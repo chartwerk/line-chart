@@ -13,7 +13,7 @@ export class ChartwerkLineChart extends ChartwerkBase {
     }): void;
     _renderCrosshair(): void;
     _useBrush(): void;
-    onMouseMove(coordinates: [number, number]): void;
+    onMouseMove(): void;
     onMouseOver(): void;
     onMouseOut(): void;
     onBrushEnd(): void;

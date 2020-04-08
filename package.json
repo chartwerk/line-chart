@@ -14,7 +14,7 @@
   },
   "author": "CorpGlory",
   "devDependencies": {
-    "@chartwerk/base": "github:chartwerk/base#declaration",
+    "@chartwerk/base": "github:chartwerk/base",
     "@types/d3": "^5.7.2",
     "@types/lodash": "^4.14.149",
     "css-loader": "^3.4.2",

@@ -2,9 +2,10 @@ import { ChartwerkBase, TimeSerie, Options } from '@chartwerk/base';
 
 import * as d3 from 'd3';
 
+
 export class ChartwerkLineChart extends ChartwerkBase {
   constructor(el: HTMLElement, _series: TimeSerie[] = [], _options: Options = {}) {
-    super(el, _series, _options);
+    super(d3, el, _series, _options);
   }
 
   // TODO: private
@@ -35,7 +36,7 @@ export class ChartwerkLineChart extends ChartwerkBase {
   }
 
   _renderMetric(datapoints: number[][], options: { color: string }): void {
-    const lineGenerator = d3.line()
+    const lineGenerator = this._d3.line()
       .x((d: [number, number]) => this.xScale(new Date(d[1])))
       .y((d: [number, number]) => this.yScale(d[0]));
 
@@ -56,7 +57,7 @@ export class ChartwerkLineChart extends ChartwerkBase {
         .attr('fill', options.color)
         .attr('stroke', 'none')
         .attr('opacity', '0.3')
-        .attr('d', d3.area()
+        .attr('d', this._d3.area()
           .x((d: [number, number]) => this.xScale(new Date(d[1])))
           .y0((d: [number, number]) => this.yScale(d[0] + this._options.confidence))
           .y1((d: [number, number]) => this.yScale(d[0] - this._options.confidence))
@@ -95,40 +96,37 @@ export class ChartwerkLineChart extends ChartwerkBase {
   }
 
   _useBrush(): void {
-    this._brush = d3.brushX()
+    this._brush = this._d3.brushX()
       .extent([
         [0, 0],
         [this.width, this.height]
       ])
       .handleSize(20)
-      .filter(() => !d3.event.shiftKey)
+      .filter(() => !this._d3.event.shiftKey)
       .on('end', this.onBrushEnd.bind(this))
 
-    const onMouseMove = this.onMouseMove.bind(this);
     this._chartContainer
       .call(this._brush)
       .on('mouseover', this.onMouseOver.bind(this))
       .on('mouseout', this.onMouseOut.bind(this))
-      .on('mousemove', function () {
-        // @ts-ignore
-        const coordinates = d3.mouse(this);
-        onMouseMove(coordinates);
-      })
+      .on('mousemove', this.onMouseMove.bind(this))
       .on('dblclick', this.zoomOut.bind(this));
 
   }
 
-  onMouseMove(coordinates: [number, number]): void {
+  onMouseMove(): void {
+    const eventX = this._d3.event.clientX - 120;
+
     this._crosshair.select('#crosshair-line-x')
-      .attr('y1', 0).attr('x1', coordinates[0])
-      .attr('y2', this.yScale(this.minValue)).attr('x2', coordinates[0]);
-    console.log(this._series)
+      .attr('y1', 0).attr('x1', eventX)
+      .attr('y2', this.yScale(this.minValue)).attr('x2', eventX);
+      
     if(this._series === undefined || this._series.length === 0) {
       return;
     }
 
-    const bisectDate = d3.bisector((d: [number, number]) => d[1]).left;
-    const mouseDate = this.xTimeScale.invert(coordinates[0]).getTime();
+    const bisectDate = this._d3.bisector((d: [number, number]) => d[1]).left;
+    const mouseDate = this.xTimeScale.invert(eventX).getTime();
 
     let idx = bisectDate(this._series[0].datapoints, mouseDate);
     if(
@@ -155,8 +153,8 @@ export class ChartwerkLineChart extends ChartwerkBase {
     }
 
     this._options.eventsCallbacks.mouseMove({
-      x: d3.event.clientX,
-      y: d3.event.clientY,
+      x: this._d3.event.clientX,
+      y: this._d3.event.clientY,
       time: this._series[0].datapoints[idx][1],
       series
     });
@@ -172,7 +170,7 @@ export class ChartwerkLineChart extends ChartwerkBase {
   }
 
   onBrushEnd(): void {
-    const extent = d3.event.selection;
+    const extent = this._d3.event.selection;
     if(extent === undefined || extent === null || extent.length < 2) {
       return;
     }
