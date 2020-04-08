@@ -1,4 +1,4 @@
-import { ChartwerkBase, TimeSerie, Options } from '@chartwerk/base';  
+import { ChartwerkBase, TimeSerie, Options } from '@chartwerk/base';
 
 import * as d3 from 'd3';
 
@@ -104,7 +104,7 @@ export class ChartwerkLineChart extends ChartwerkBase {
       .filter(() => !d3.event.shiftKey)
       .on('end', this.onBrushEnd.bind(this))
 
-    const onMouseMove = this.onMouseMove.bind(this)
+    const onMouseMove = this.onMouseMove.bind(this);
     this._chartContainer
       .call(this._brush)
       .on('mouseover', this.onMouseOver.bind(this))
