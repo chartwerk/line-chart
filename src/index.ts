@@ -8,13 +8,15 @@ export class ChartwerkLineChart extends ChartwerkBase {
     super(d3, el, _series, _options);
   }
 
-  // TODO: private
+  // TODO: private, type for timeseries
   _renderMetrics(): void {
     if(this._series.length > 0) {
       for(const idx in this._series) {
+        // @ts-ignore
+        const confidence = this._series[idx].confidence || 0;
         this._renderMetric(
           this._series[idx].datapoints,
-          { color: this._options.colors[idx] }
+          { color: this._options.colors[idx], confidence }
         );
       }
     } else {
@@ -35,7 +37,7 @@ export class ChartwerkLineChart extends ChartwerkBase {
       .text('No data points');
   }
 
-  _renderMetric(datapoints: number[][], options: { color: string }): void {
+  _renderMetric(datapoints: number[][], options: { color: string, confidence: number }): void {
     const lineGenerator = this._d3.line()
       .x((d: [number, number]) => this.xScale(new Date(d[1])))
       .y((d: [number, number]) => this.yScale(d[0]));
@@ -51,7 +53,7 @@ export class ChartwerkLineChart extends ChartwerkBase {
       .attr('stroke-opacity', 0.7)
       .attr('d', lineGenerator);
 
-    if(this._options.confidence > 0) {
+    if(options.confidence > 0) {
       this._chartContainer.append('path')
         .datum(datapoints)
         .attr('fill', options.color)
@@ -59,8 +61,8 @@ export class ChartwerkLineChart extends ChartwerkBase {
         .attr('opacity', '0.3')
         .attr('d', this._d3.area()
           .x((d: [number, number]) => this.xScale(new Date(d[1])))
-          .y0((d: [number, number]) => this.yScale(d[0] + this._options.confidence))
-          .y1((d: [number, number]) => this.yScale(d[0] - this._options.confidence))
+          .y0((d: [number, number]) => this.yScale(d[0] + options.confidence))
+          .y1((d: [number, number]) => this.yScale(d[0] - options.confidence))
         )
     }
   }
