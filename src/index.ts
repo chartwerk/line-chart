@@ -115,7 +115,7 @@ export class ChartwerkLineChart extends ChartwerkBase {
   }
 
   onMouseMove(): void {
-    const eventX = this._d3.event.clientX - 120;
+    const eventX = this._d3.mouse(this._chartContainer.node())[0];
 
     this._crosshair.select('#crosshair-line-x')
       .attr('y1', 0).attr('x1', eventX)
