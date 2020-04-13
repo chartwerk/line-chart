@@ -12,6 +12,9 @@ export class ChartwerkLineChart extends ChartwerkBase {
   _renderMetrics(): void {
     if(this._series.length > 0) {
       for(const idx in this._series) {
+        if(this._series[idx].visible === false) {
+          continue;
+        }
         // @ts-ignore
         const confidence = this._series[idx].confidence || 0;
         this._renderMetric(
