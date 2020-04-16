@@ -11,6 +11,7 @@ export class ChartwerkLineChart extends ChartwerkBase {
     _renderMetric(datapoints: number[][], options: {
         color: string;
         confidence: number;
+        target: string;
     }): void;
     _renderCrosshair(): void;
     _useBrush(): void;
