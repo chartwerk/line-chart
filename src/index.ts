@@ -1,7 +1,7 @@
 import { ChartwerkBase, TimeSerie, Options } from '@chartwerk/base';
 
 import * as d3 from 'd3';
-
+import * as _ from 'lodash';
 
 export class ChartwerkLineChart extends ChartwerkBase {
   constructor(el: HTMLElement, _series: TimeSerie[] = [], _options: Options = {}) {
@@ -17,9 +17,10 @@ export class ChartwerkLineChart extends ChartwerkBase {
         }
         // @ts-ignore
         const confidence = this._series[idx].confidence || 0;
+        const target = this._series[idx].target;
         this._renderMetric(
           this._series[idx].datapoints,
-          { color: this._options.colors[idx], confidence }
+          { color: this._options.colors[idx], confidence, target }
         );
       }
     } else {
@@ -40,7 +41,10 @@ export class ChartwerkLineChart extends ChartwerkBase {
       .text('No data points');
   }
 
-  _renderMetric(datapoints: number[][], options: { color: string, confidence: number }): void {
+  _renderMetric(datapoints: number[][], options: { color: string, confidence: number, target: string }): void {
+    if(_.includes(this.seriesTargetsWithBounds, options.target)) {
+      return;
+    }
     const lineGenerator = this._d3.line()
       .x((d: [number, number]) => this.xScale(new Date(d[1])))
       .y((d: [number, number]) => this.yScale(d[0]));
@@ -55,6 +59,33 @@ export class ChartwerkLineChart extends ChartwerkBase {
       .attr('stroke-width', 1)
       .attr('stroke-opacity', 0.7)
       .attr('d', lineGenerator);
+
+    let upperBoundDatapoints = [];
+    let lowerBoundDatapoints = [];
+    this._series.forEach(serie => {
+      if(serie.target === this.formatedBound(this._options.bounds.upper, options.target)) {
+        upperBoundDatapoints = serie.datapoints;
+      }
+      if(serie.target === this.formatedBound(this._options.bounds.lower, options.target)) {
+        lowerBoundDatapoints = serie.datapoints;
+      }
+    });
+
+    if(upperBoundDatapoints.length > 0 && lowerBoundDatapoints.length > 0) {
+      const zip = (arr1, arr2) => arr1.map((k, i) => [k[0],k[1], arr2[i][0]]);
+      const data = zip(upperBoundDatapoints, lowerBoundDatapoints);
+
+      this._chartContainer.append('path')
+        .datum(data)
+        .attr('fill', options.color)
+        .attr('stroke', 'none')
+        .attr('opacity', '0.3')
+        .attr('d', this._d3.area()
+          .x((d: number[]) => this.xScale(new Date(d[1])))
+          .y0((d: number[]) => this.yScale(d[0]))
+          .y1((d: number[]) => this.yScale(d[2]))
+        )
+    }
 
     if(options.confidence > 0) {
       this._chartContainer.append('path')
@@ -116,7 +147,6 @@ export class ChartwerkLineChart extends ChartwerkBase {
       .on('mouseout', this.onMouseOut.bind(this))
       .on('mousemove', this.onMouseMove.bind(this))
       .on('dblclick', this.zoomOut.bind(this));
-
   }
 
   onMouseMove(): void {
@@ -143,6 +173,9 @@ export class ChartwerkLineChart extends ChartwerkBase {
 
     const series: any[] = [];
     for(let i = 0; i < this._series.length; i++) {
+      if(_.includes(this.seriesTargetsWithBounds, this._series[i].target)) {
+        continue;
+      }
       const y = this.yScale(this._series[i].datapoints[idx][0]);
       const x = this.xScale(this._series[i].datapoints[idx][1]);
 
