@@ -10,17 +10,18 @@ export class ChartwerkLineChart extends ChartwerkBase {
 
   // TODO: private, type for timeseries
   _renderMetrics(): void {
-    if(this._series.length > 0) {
-      for(const idx in this._series) {
-        if(this._series[idx].visible === false) {
-          continue;
-        }
+    for(const i in this._series) {
+      // @ts-ignore
+      this._series[i].color = this._options.colors[i];
+    }
+    if(this.visibleSeries.length > 0) {
+      for(const idx in this.visibleSeries) {
         // @ts-ignore
-        const confidence = this._series[idx].confidence || 0;
-        const target = this._series[idx].target;
+        const confidence = this.visibleSeries[idx].confidence || 0;
+        const target = this.visibleSeries[idx].target;
         this._renderMetric(
-          this._series[idx].datapoints,
-          { color: this._options.colors[idx], confidence, target }
+          this.visibleSeries[idx].datapoints,
+          { color: this.visibleSeries[idx].color, confidence, target }
         );
       }
     } else {
@@ -151,7 +152,10 @@ export class ChartwerkLineChart extends ChartwerkBase {
 
   onMouseMove(): void {
     const eventX = this._d3.mouse(this._chartContainer.node())[0];
-
+    if(this.isOutOfChart() === true) {
+      this._crosshair.style('display', 'none');
+      return;
+    }
     this._crosshair.select('#crosshair-line-x')
       .attr('y1', 0).attr('x1', eventX)
       .attr('y2', this.yScale(this.minValue)).attr('x2', eventX);
@@ -173,7 +177,12 @@ export class ChartwerkLineChart extends ChartwerkBase {
 
     const series: any[] = [];
     for(let i = 0; i < this._series.length; i++) {
-      if(_.includes(this.seriesTargetsWithBounds, this._series[i].target)) {
+      if(
+        this._series[i].visible === false ||
+        _.includes(this.seriesTargetsWithBounds, this._series[i].target)        
+      ) {
+        this._crosshair.select(`#crosshair-circle-${i}`)
+          .style('display', 'none');
         continue;
       }
       const y = this.yScale(this._series[i].datapoints[idx][0]);
@@ -225,6 +234,9 @@ export class ChartwerkLineChart extends ChartwerkBase {
   }
 
   zoomOut(): void {
+    if(this.isOutOfChart() === true) {
+      return;
+    }
     const midTimestamp = this.xTimeScale.invert(this.width / 2).getTime();
     if(this._options.eventsCallbacks !== undefined && this._options.eventsCallbacks.zoomOut !== undefined) {
       this._options.eventsCallbacks.zoomOut(midTimestamp);
