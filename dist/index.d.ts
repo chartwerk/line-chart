@@ -12,6 +12,7 @@ export class ChartwerkLineChart extends ChartwerkBase {
         color: string;
         confidence: number;
         target: string;
+        mode: string;
     }): void;
     _renderCrosshair(): void;
     _useBrush(): void;
