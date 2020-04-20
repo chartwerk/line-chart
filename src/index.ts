@@ -18,10 +18,12 @@ export class ChartwerkLineChart extends ChartwerkBase {
       for(const idx in this.visibleSeries) {
         // @ts-ignore
         const confidence = this.visibleSeries[idx].confidence || 0;
+        //@ts-ignore
+        const mode = this.visibleSeries[idx].mode || 'Standart';
         const target = this.visibleSeries[idx].target;
         this._renderMetric(
           this.visibleSeries[idx].datapoints,
-          { color: this.visibleSeries[idx].color, confidence, target }
+          { color: this.visibleSeries[idx].color, confidence, target, mode }
         );
       }
     } else {
@@ -42,10 +44,35 @@ export class ChartwerkLineChart extends ChartwerkBase {
       .text('No data points');
   }
 
-  _renderMetric(datapoints: number[][], options: { color: string, confidence: number, target: string }): void {
+  _renderMetric(datapoints: number[][], options: { color: string, confidence: number, target: string, mode: string }): void {
     if(_.includes(this.seriesTargetsWithBounds, options.target)) {
       return;
     }
+
+    if(options.mode === 'Charge') {
+      const dataPairs = this._d3.pairs(datapoints);
+      this._chartContainer.selectAll(null)
+        .data(dataPairs)
+        .enter()
+        .append('line')
+        .attr('x1', d => this.xScale(d[0][1]))
+        .attr('x2', d => this.xScale(d[1][1]))
+        .attr('y1', d => this.yScale(d[0][0]))
+        .attr('y2', d => this.yScale(d[1][0]))
+        .attr('stroke-opacity', 0.7)
+        .style('stroke-width', 1)
+        .style('stroke', d => {
+          if(d[1][0] > d[0][0]) {
+            return 'green';
+          } else if (d[1][0] < d[0][0]) {
+            return 'red';
+          } else {
+            return 'gray';
+          }
+        });
+      return;
+    }
+
     const lineGenerator = this._d3.line()
       .x((d: [number, number]) => this.xScale(new Date(d[1])))
       .y((d: [number, number]) => this.yScale(d[0]));
