@@ -18,34 +18,48 @@ export class ChartwerkLineChart extends ChartwerkBase {
       for(const idx in this.visibleSeries) {
         // @ts-ignore
         const confidence = this.visibleSeries[idx].confidence || 0;
+        //@ts-ignore
+        const mode = this.visibleSeries[idx].mode || 'Standart';
         const target = this.visibleSeries[idx].target;
         this._renderMetric(
           this.visibleSeries[idx].datapoints,
-          { color: this.visibleSeries[idx].color, confidence, target }
+          { color: this.visibleSeries[idx].color, confidence, target, mode }
         );
       }
     } else {
       this._renderNoDataPointsMessage();
     }
-    this._renderCrosshair();
-    this._useBrush();
   }
 
-  _renderNoDataPointsMessage(): void {
-    this._chartContainer.append('text')
-      .attr('class', 'alert-text')
-      .attr('x', this.width / 2)
-      .attr('y', this.height / 2)
-      .style('text-anchor', 'middle')
-      .style('font-size', '14px')
-      .style('fill', 'currentColor')
-      .text('No data points');
-  }
-
-  _renderMetric(datapoints: number[][], options: { color: string, confidence: number, target: string }): void {
+  _renderMetric(datapoints: number[][], options: { color: string, confidence: number, target: string, mode: string }): void {
     if(_.includes(this.seriesTargetsWithBounds, options.target)) {
       return;
     }
+
+    if(options.mode === 'Charge') {
+      const dataPairs = this._d3.pairs(datapoints);
+      this._chartContainer.selectAll(null)
+        .data(dataPairs)
+        .enter()
+        .append('line')
+        .attr('x1', d => this.xScale(d[0][1]))
+        .attr('x2', d => this.xScale(d[1][1]))
+        .attr('y1', d => this.yScale(d[0][0]))
+        .attr('y2', d => this.yScale(d[1][0]))
+        .attr('stroke-opacity', 0.7)
+        .style('stroke-width', 1)
+        .style('stroke', d => {
+          if(d[1][0] > d[0][0]) {
+            return 'green';
+          } else if (d[1][0] < d[0][0]) {
+            return 'red';
+          } else {
+            return 'gray';
+          }
+        });
+      return;
+    }
+
     const lineGenerator = this._d3.line()
       .x((d: [number, number]) => this.xScale(new Date(d[1])))
       .y((d: [number, number]) => this.yScale(d[0]));
@@ -102,52 +116,19 @@ export class ChartwerkLineChart extends ChartwerkBase {
     }
   }
 
-  _renderCrosshair(): void {
-    this._crosshair = this._chartContainer.append('g')
+  public renderSharedCrosshair(timestamp: number): void {
+    this._crosshair.style('display', null);
+    this._crosshair.selectAll('.crosshair-circle')
       .style('display', 'none');
 
-    this._crosshair.append('line')
-      .attr('class', 'crosshair-line')
-      .attr('id', 'crosshair-line-x')
-      .attr('fill', 'none')
-      .attr('stroke', 'red')
-      .attr('stroke-width', '0.5px');
-
-    for(let i = 0; i < this._series.length; i++) {
-      this._crosshair.append('circle')
-        .attr('class', 'crosshair-circle')
-        .attr('id', `crosshair-circle-${i}`)
-        .attr('r', 2)
-        .style('fill', 'white')
-        .style('stroke', 'red')
-        .style('stroke-width', '1px');
-    }
-
-    this._chartContainer.append('rect')
-      .style('fill', 'none')
-      .style('stroke', 'none')
-      .style('pointer-events', 'all')
-      .style('cursor', 'crosshair')
-      .attr('width', this.width)
-      .attr('height', this.height);
+    const x = this.timestampScale(timestamp);
+    this._crosshair.select('#crosshair-line-x')
+      .attr('y1', 0).attr('x1', x)
+      .attr('y2', this.height).attr('x2', x); 
   }
 
-  _useBrush(): void {
-    this._brush = this._d3.brushX()
-      .extent([
-        [0, 0],
-        [this.width, this.height]
-      ])
-      .handleSize(20)
-      .filter(() => !this._d3.event.shiftKey)
-      .on('end', this.onBrushEnd.bind(this))
-
-    this._chartContainer
-      .call(this._brush)
-      .on('mouseover', this.onMouseOver.bind(this))
-      .on('mouseout', this.onMouseOut.bind(this))
-      .on('mousemove', this.onMouseMove.bind(this))
-      .on('dblclick', this.zoomOut.bind(this));
+  public hideSharedCrosshair(): void {
+    this._crosshair.style('display', 'none');
   }
 
   onMouseMove(): void {
@@ -165,7 +146,7 @@ export class ChartwerkLineChart extends ChartwerkBase {
     }
 
     const bisectDate = this._d3.bisector((d: [number, number]) => d[1]).left;
-    const mouseDate = this.xTimeScale.invert(eventX).getTime();
+    const mouseDate = this.xScale.invert(eventX).getTime();
 
     let idx = bisectDate(this._series[0].datapoints, mouseDate);
     if(
@@ -202,46 +183,21 @@ export class ChartwerkLineChart extends ChartwerkBase {
     this._options.eventsCallbacks.mouseMove({
       x: this._d3.event.clientX,
       y: this._d3.event.clientY,
-      time: this._series[0].datapoints[idx][1],
-      series
+      time: this.timestampScale.invert(eventX),
+      series,
+      chartX: eventX,
+      chartWidth: this.width
     });
   }
 
   onMouseOver(): void {
     this._crosshair.style('display', null);
+    this._crosshair.selectAll('.crosshair-circle')
+      .style('display', null);
   }
 
   onMouseOut(): void {
     this._options.eventsCallbacks.mouseOut();
     this._crosshair.style('display', 'none');
-  }
-
-  onBrushEnd(): void {
-    const extent = this._d3.event.selection;
-    if(extent === undefined || extent === null || extent.length < 2) {
-      return;
-    }
-    const startTimestamp = this.xTimeScale.invert(extent[0]).getTime();
-    const endTimestamp = this.xTimeScale.invert(extent[1]).getTime();
-    const range: [number, number] = [startTimestamp, endTimestamp];
-    this._chartContainer
-      .call(this._brush.move, null);
-    if(this._options.eventsCallbacks !== undefined && this._options.eventsCallbacks.zoomIn !== undefined) {
-      this._options.eventsCallbacks.zoomIn(range);
-    } else {
-      console.log('zoom in, but there is no callback');
-    }
-  }
-
-  zoomOut(): void {
-    if(this.isOutOfChart() === true) {
-      return;
-    }
-    const midTimestamp = this.xTimeScale.invert(this.width / 2).getTime();
-    if(this._options.eventsCallbacks !== undefined && this._options.eventsCallbacks.zoomOut !== undefined) {
-      this._options.eventsCallbacks.zoomOut(midTimestamp);
-    } else {
-      console.log('zoom out, but there is no callback');
-    }
   }
 }

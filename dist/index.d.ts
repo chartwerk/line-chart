@@ -7,18 +7,16 @@ import { ChartwerkBase, TimeSerie, Options } from '@chartwerk/base';
 export class ChartwerkLineChart extends ChartwerkBase {
     constructor(el: HTMLElement, _series?: TimeSerie[], _options?: Options);
     _renderMetrics(): void;
-    _renderNoDataPointsMessage(): void;
     _renderMetric(datapoints: number[][], options: {
         color: string;
         confidence: number;
         target: string;
+        mode: string;
     }): void;
-    _renderCrosshair(): void;
-    _useBrush(): void;
+    renderSharedCrosshair(timestamp: number): void;
+    hideSharedCrosshair(): void;
     onMouseMove(): void;
     onMouseOver(): void;
     onMouseOut(): void;
-    onBrushEnd(): void;
-    zoomOut(): void;
 }
 
