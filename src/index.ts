@@ -77,14 +77,20 @@ export class ChartwerkLineChart extends ChartwerkBase {
 
     let upperBoundDatapoints = [];
     let lowerBoundDatapoints = [];
-    this._series.forEach(serie => {
-      if(serie.target === this.formatedBound(this._options.bounds.upper, options.target)) {
-        upperBoundDatapoints = serie.datapoints;
-      }
-      if(serie.target === this.formatedBound(this._options.bounds.lower, options.target)) {
-        lowerBoundDatapoints = serie.datapoints;
-      }
-    });
+    if(
+      this._options.bounds !== undefined &&
+      this._options.bounds.upper !== undefined &&
+      this._options.bounds.lower !== undefined
+    ) {
+      this._series.forEach(serie => {
+        if(serie.target === this.formatedBound(this._options.bounds.upper, options.target)) {
+          upperBoundDatapoints = serie.datapoints;
+        }
+        if(serie.target === this.formatedBound(this._options.bounds.lower, options.target)) {
+          lowerBoundDatapoints = serie.datapoints;
+        }
+      });
+    }
 
     if(upperBoundDatapoints.length > 0 && lowerBoundDatapoints.length > 0) {
       const zip = (arr1, arr2) => arr1.map((k, i) => [k[0],k[1], arr2[i][0]]);
@@ -138,8 +144,8 @@ export class ChartwerkLineChart extends ChartwerkBase {
       return;
     }
     this._crosshair.select('#crosshair-line-x')
-      .attr('y1', 0).attr('x1', eventX)
-      .attr('y2', this.yScale(this.minValue)).attr('x2', eventX);
+      .attr('x1', eventX)
+      .attr('x2', eventX);
       
     if(this._series === undefined || this._series.length === 0) {
       return;
@@ -197,7 +203,9 @@ export class ChartwerkLineChart extends ChartwerkBase {
   }
 
   onMouseOut(): void {
-    this._options.eventsCallbacks.mouseOut();
+    if(this._options.eventsCallbacks !== undefined && this._options.eventsCallbacks.mouseOut !== undefined) {
+      this._options.eventsCallbacks.mouseOut();
+    }
     this._crosshair.style('display', 'none');
   }
 }
