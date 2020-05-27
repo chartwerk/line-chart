@@ -19,4 +19,11 @@ export class ChartwerkLineChart extends ChartwerkBase {
     onMouseOver(): void;
     onMouseOut(): void;
 }
+export const VueChartwerkLineChartObject: {
+    render(createElement: any): any;
+    mixins: any[];
+    methods: {
+        render(): void;
+    };
+};
 

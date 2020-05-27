@@ -1,4 +1,4 @@
-import { ChartwerkBase, TimeSerie, Options } from '@chartwerk/base';
+import { ChartwerkBase, TimeSerie, Options, VueChartwerkBaseMixin } from '@chartwerk/base';
 
 import * as d3 from 'd3';
 import * as _ from 'lodash';
@@ -130,7 +130,7 @@ export class ChartwerkLineChart extends ChartwerkBase {
     const x = this.timestampScale(timestamp);
     this._crosshair.select('#crosshair-line-x')
       .attr('y1', 0).attr('x1', x)
-      .attr('y2', this.height).attr('x2', x); 
+      .attr('y2', this.height).attr('x2', x);
   }
 
   public hideSharedCrosshair(): void {
@@ -146,7 +146,7 @@ export class ChartwerkLineChart extends ChartwerkBase {
     this._crosshair.select('#crosshair-line-x')
       .attr('x1', eventX)
       .attr('x2', eventX);
-      
+
     if(this._series === undefined || this._series.length === 0) {
       return;
     }
@@ -166,7 +166,7 @@ export class ChartwerkLineChart extends ChartwerkBase {
     for(let i = 0; i < this._series.length; i++) {
       if(
         this._series[i].visible === false ||
-        _.includes(this.seriesTargetsWithBounds, this._series[i].target)        
+        _.includes(this.seriesTargetsWithBounds, this._series[i].target)
       ) {
         this._crosshair.select(`#crosshair-circle-${i}`)
           .style('display', 'none');
@@ -209,3 +209,23 @@ export class ChartwerkLineChart extends ChartwerkBase {
     this._crosshair.style('display', 'none');
   }
 }
+
+// it is used with Vue.component, e.g.: Vue.component('chartwerk-line-chart', VueChartwerkLineChartObject)
+export const VueChartwerkLineChartObject = {
+  // alternative to `template: '<div class="chartwerk-line-chart" :id="id" />'`
+  render(createElement) {
+    return createElement(
+      'div',
+      {
+        class: { 'chartwerk-line-chart': true },
+        attrs: { id: this.id }
+      }
+    );
+  },
+  mixins: [VueChartwerkBaseMixin],
+  methods: {
+    render() {
+      new ChartwerkLineChart(document.getElementById(this.id), this.series, this.options);
+    }
+  }
+};
