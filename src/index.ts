@@ -220,7 +220,7 @@ export const VueChartwerkLineChartObject = {
         class: { 'chartwerk-line-chart': true },
         attrs: { id: this.id }
       }
-    )
+    );
   },
   mixins: [VueChartwerkBaseMixin],
   methods: {
