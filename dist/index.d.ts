@@ -4,13 +4,6 @@
 
 import { ChartwerkBase, TimeSerie, Options } from '@chartwerk/base';
 
-export const VueChartwerkLineChartObject: {
-    template: string;
-    mixins: any[];
-    methods: {
-        render(): void;
-    };
-};
 export class ChartwerkLineChart extends ChartwerkBase {
     constructor(el: HTMLElement, _series?: TimeSerie[], _options?: Options);
     _renderMetrics(): void;
@@ -26,4 +19,11 @@ export class ChartwerkLineChart extends ChartwerkBase {
     onMouseOver(): void;
     onMouseOut(): void;
 }
+export const VueChartwerkLineChartObject: {
+    render(createElement: any): any;
+    mixins: any[];
+    methods: {
+        render(): void;
+    };
+};
 

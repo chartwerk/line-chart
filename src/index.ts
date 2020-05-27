@@ -3,16 +3,6 @@ import { ChartwerkBase, TimeSerie, Options, VueChartwerkBaseMixin } from '@chart
 import * as d3 from 'd3';
 import * as _ from 'lodash';
 
-export const VueChartwerkLineChartObject = {
-  template: '<div class="chartwerk-line-chart" :id="id" />',
-  mixins: [VueChartwerkBaseMixin],
-  methods: {
-    render() {
-      new ChartwerkLineChart(document.getElementById(this.id), this.series, this.options);
-    }
-  }
-};
-
 export class ChartwerkLineChart extends ChartwerkBase {
   constructor(el: HTMLElement, _series: TimeSerie[] = [], _options: Options = {}) {
     super(d3, el, _series, _options);
@@ -219,3 +209,23 @@ export class ChartwerkLineChart extends ChartwerkBase {
     this._crosshair.style('display', 'none');
   }
 }
+
+// it is used with Vue.component, e.g.: Vue.component('chartwerk-line-chart', VueChartwerkLineChartObject)
+export const VueChartwerkLineChartObject = {
+  // alternative to `template: '<div class="chartwerk-line-chart" :id="id" />'`
+  render(createElement) {
+    return createElement(
+      'div',
+      {
+        class: { 'chartwerk-line-chart': true },
+        attrs: { id: this.id }
+      }
+    )
+  },
+  mixins: [VueChartwerkBaseMixin],
+  methods: {
+    render() {
+      new ChartwerkLineChart(document.getElementById(this.id), this.series, this.options);
+    }
+  }
+};
