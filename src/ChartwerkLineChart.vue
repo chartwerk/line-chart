@@ -4,21 +4,6 @@
 </template>
 
 <script>
-import ChartwerkBase from '@chartwerk/base/dist/ChartwerkBase.vue';
-
-import { ChartwerkLineChart } from '@chartwerk/line-chart';
-
-import Vue from 'vue';
-
-import * as _ from 'lodash';
-
-export default ChartwerkBase.extend({
-  methods: {
-    render() {
-      new ChartwerkLineChart(document.getElementById(this.id), this.series, this.options);
-    }
-  }
-})
 </script>
 
 <style scoped>
