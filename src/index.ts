@@ -3,9 +3,7 @@ import { ChartwerkBase, TimeSerie, Options, VueChartwerkBaseMixin } from '@chart
 import * as d3 from 'd3';
 import * as _ from 'lodash';
 
-import Vue from 'vue';
-
-export const VueChartwerkLineChart = Vue.extend({
+export const VueChartwerkLineChartObject = {
   template: '<div class="chartwerk-line-chart" :id="id" />',
   mixins: [VueChartwerkBaseMixin],
   methods: {
@@ -13,7 +11,7 @@ export const VueChartwerkLineChart = Vue.extend({
       new ChartwerkLineChart(document.getElementById(this.id), this.series, this.options);
     }
   }
-});
+};
 
 export class ChartwerkLineChart extends ChartwerkBase {
   constructor(el: HTMLElement, _series: TimeSerie[] = [], _options: Options = {}) {
