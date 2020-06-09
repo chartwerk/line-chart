@@ -2,17 +2,13 @@
 // Dependencies for this module:
 //   ../@chartwerk/base
 
-import { ChartwerkBase, TimeSerie, Options } from '@chartwerk/base';
+import { ChartwerkBase } from '@chartwerk/base';
+import { TimeSerie, Options, TickOrientation, TimeFormat } from '@chartwerk/base';
 
-export class ChartwerkLineChart extends ChartwerkBase {
-    constructor(el: HTMLElement, _series?: TimeSerie[], _options?: Options);
+export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions> {
+    constructor(el: HTMLElement, _series?: LineTimeSerie[], _options?: LineOptions);
     _renderMetrics(): void;
-    _renderMetric(datapoints: number[][], options: {
-        color: string;
-        confidence: number;
-        target: string;
-        mode: string;
-    }): void;
+    _renderMetric(datapoints: number[][], options: RenderMetricOption): void;
     renderSharedCrosshair(timestamp: number): void;
     hideSharedCrosshair(): void;
     onMouseMove(): void;
@@ -26,4 +22,22 @@ export const VueChartwerkLineChartObject: {
         render(): void;
     };
 };
+
+type LineTimeSerieParams = {
+    confidence: number;
+    mode: Mode;
+};
+export enum Mode {
+    STANDARD = "Standard",
+    CHARGE = "Charge"
+}
+export type LineTimeSerie = TimeSerie & Partial<LineTimeSerieParams>;
+export type LineOptions = Options;
+export type RenderMetricOption = {
+    color: string;
+    confidence: number;
+    target: string;
+    mode: Mode;
+};
+export { TickOrientation, TimeFormat };
 
