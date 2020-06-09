@@ -1,25 +1,22 @@
-import { ChartwerkBase, TimeSerie, Options, VueChartwerkBaseMixin } from '@chartwerk/base';
+import { ChartwerkBase, VueChartwerkBaseMixin } from '@chartwerk/base';
+import { LineTimeSerie, LineOptions, Mode, RenderMetricOption } from './types';
 
 import * as d3 from 'd3';
 import * as _ from 'lodash';
 
-export class ChartwerkLineChart extends ChartwerkBase {
-  constructor(el: HTMLElement, _series: TimeSerie[] = [], _options: Options = {}) {
+export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions> {
+  constructor(el: HTMLElement, _series: LineTimeSerie[] = [], _options: LineOptions = {}) {
     super(d3, el, _series, _options);
   }
 
-  // TODO: private, type for timeseries
   _renderMetrics(): void {
     for(const i in this._series) {
-      // @ts-ignore
-      this._series[i].color = this._options.colors[i];
+      this._series[i].color = this._series[i].color || this._options.colors[i];
     }
     if(this.visibleSeries.length > 0) {
       for(const idx in this.visibleSeries) {
-        // @ts-ignore
         const confidence = this.visibleSeries[idx].confidence || 0;
-        //@ts-ignore
-        const mode = this.visibleSeries[idx].mode || 'Standart';
+        const mode = this.visibleSeries[idx].mode || Mode.STANDARD;
         const target = this.visibleSeries[idx].target;
         this._renderMetric(
           this.visibleSeries[idx].datapoints,
@@ -31,12 +28,12 @@ export class ChartwerkLineChart extends ChartwerkBase {
     }
   }
 
-  _renderMetric(datapoints: number[][], options: { color: string, confidence: number, target: string, mode: string }): void {
+  _renderMetric(datapoints: number[][], options: RenderMetricOption): void {
     if(_.includes(this.seriesTargetsWithBounds, options.target)) {
       return;
     }
 
-    if(options.mode === 'Charge') {
+    if(options.mode === Mode.CHARGE) {
       const dataPairs = this._d3.pairs(datapoints);
       this._chartContainer.selectAll(null)
         .data(dataPairs)
@@ -64,11 +61,11 @@ export class ChartwerkLineChart extends ChartwerkBase {
       .x((d: [number, number]) => this.xScale(new Date(d[1])))
       .y((d: [number, number]) => this.yScale(d[0]));
 
-    // TODO: clip
     this._chartContainer
       .append('path')
       .datum(datapoints)
       .attr('class', 'metric-path')
+      .attr('clip-path', `url(#${this.rectClipId})`)
       .attr('fill', 'none')
       .attr('stroke', options.color)
       .attr('stroke-width', 1)
