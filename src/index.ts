@@ -222,7 +222,8 @@ export const VueChartwerkLineChartObject = {
   mixins: [VueChartwerkBaseMixin],
   methods: {
     render() {
-      new ChartwerkLineChart(document.getElementById(this.id), this.series, this.options);
+      const pod = new ChartwerkLineChart(document.getElementById(this.id), this.series, this.options);
+      pod.render();
     }
   }
 };
