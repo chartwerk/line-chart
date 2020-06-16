@@ -5,6 +5,7 @@
     "module": "esnext",
     "moduleResolution": "node",
     "declaration": true,
+    "declarationDir": "dist",
     "allowSyntheticDefaultImports": true,
     "inlineSourceMap": false,
     "sourceMap": true,
