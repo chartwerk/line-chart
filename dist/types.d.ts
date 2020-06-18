@@ -1,4 +1,4 @@
-import { TimeSerie, Options, TickOrientation, TimeFormat } from '@chartwerk/base';
+import { TimeSerie, Options } from '@chartwerk/base';
 declare type LineTimeSerieParams = {
     confidence: number;
     mode: Mode;
@@ -15,4 +15,4 @@ export declare type RenderMetricOption = {
     target: string;
     mode: Mode;
 };
-export { TickOrientation, TimeFormat };
+export {};

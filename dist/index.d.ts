@@ -1,5 +1,5 @@
-import { ChartwerkBase } from '@chartwerk/base';
-import { LineTimeSerie, LineOptions, RenderMetricOption } from './types';
+import { ChartwerkBase, TickOrientation, TimeFormat } from '@chartwerk/base';
+import { LineTimeSerie, LineOptions, Mode, RenderMetricOption } from './types';
 export declare class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions> {
     constructor(el: HTMLElement, _series?: LineTimeSerie[], _options?: LineOptions);
     _renderMetrics(): void;
@@ -50,3 +50,4 @@ export declare const VueChartwerkLineChartObject: {
         render(): void;
     };
 };
+export { LineTimeSerie, LineOptions, Mode, TickOrientation, TimeFormat };
