@@ -1,4 +1,4 @@
-import { ChartwerkBase, VueChartwerkBaseMixin } from '@chartwerk/base';
+import { ChartwerkBase, VueChartwerkBaseMixin, TickOrientation, TimeFormat } from '@chartwerk/base';
 import { LineTimeSerie, LineOptions, Mode, RenderMetricOption } from './types';
 
 import * as d3 from 'd3';
@@ -227,3 +227,5 @@ export const VueChartwerkLineChartObject = {
     }
   }
 };
+
+export { LineTimeSerie, LineOptions, Mode, TickOrientation, TimeFormat };
