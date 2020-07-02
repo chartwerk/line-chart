@@ -1,8 +1,9 @@
 import { ChartwerkBase, VueChartwerkBaseMixin, TickOrientation, TimeFormat } from '@chartwerk/base';
-import { LineTimeSerie, LineOptions, Mode, RenderMetricOption } from './types';
+import { LineTimeSerie, LineOptions, Mode } from './types';
 
 import * as d3 from 'd3';
 import * as _ from 'lodash';
+
 
 export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions> {
   constructor(el: HTMLElement, _series: LineTimeSerie[] = [], _options: LineOptions = {}) {
@@ -10,9 +11,6 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
   }
 
   _renderMetrics(): void {
-    for(const i in this._series) {
-      this._series[i].color = this._series[i].color || this._options.colors[i];
-    }
     if(this.visibleSeries.length > 0) {
       for(const idx in this.visibleSeries) {
         const confidence = this.visibleSeries[idx].confidence || 0;
@@ -28,7 +26,15 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
     }
   }
 
-  _renderMetric(datapoints: number[][], options: RenderMetricOption): void {
+  _renderMetric(
+    datapoints: number[][],
+    options: {
+      color: string,
+      confidence: number,
+      target: string,
+      mode: Mode
+    }
+  ): void {
     if(_.includes(this.seriesTargetsWithBounds, options.target)) {
       return;
     }
@@ -174,7 +180,7 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
 
       series.push({
         value: this._series[i].datapoints[idx][0],
-        color: this._options.colors[i],
+        color: this._series[i].color,
         label: this._series[i].alias || this._series[i].target
       });
 
