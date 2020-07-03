@@ -15,7 +15,7 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
       this._renderNoDataPointsMessage();
       return;
     }
-    for(const idx in this._series) {
+    for(let idx = 0; idx < this._series.length; ++idx) {
       if(this._series[idx].visible === false) {
         continue;
       }
@@ -24,7 +24,7 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
       const target = this._series[idx].target;
       this._renderMetric(
         this._series[idx].datapoints,
-        { color: this.getSerieColor(Number(idx)), confidence, target, mode }
+        { color: this.getSerieColor(idx), confidence, target, mode }
       );
     }
   }
