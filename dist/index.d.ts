@@ -1,9 +1,14 @@
 import { ChartwerkBase, TickOrientation, TimeFormat } from '@chartwerk/base';
-import { LineTimeSerie, LineOptions, Mode, RenderMetricOption } from './types';
+import { LineTimeSerie, LineOptions, Mode } from './types';
 export declare class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions> {
     constructor(el: HTMLElement, _series?: LineTimeSerie[], _options?: LineOptions);
     _renderMetrics(): void;
-    _renderMetric(datapoints: number[][], options: RenderMetricOption): void;
+    _renderMetric(datapoints: number[][], metricOptions: {
+        color: string;
+        confidence: number;
+        target: string;
+        mode: Mode;
+    }): void;
     renderSharedCrosshair(timestamp: number): void;
     hideSharedCrosshair(): void;
     onMouseMove(): void;

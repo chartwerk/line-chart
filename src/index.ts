@@ -11,35 +11,38 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
   }
 
   _renderMetrics(): void {
-    if(this.visibleSeries.length > 0) {
-      for(const idx in this.visibleSeries) {
-        const confidence = this.visibleSeries[idx].confidence || 0;
-        const mode = this.visibleSeries[idx].mode || Mode.STANDARD;
-        const target = this.visibleSeries[idx].target;
-        this._renderMetric(
-          this.visibleSeries[idx].datapoints,
-          { color: this.visibleSeries[idx].color, confidence, target, mode }
-        );
-      }
-    } else {
+    if(this._series.length === 0) {
       this._renderNoDataPointsMessage();
+      return;
+    }
+    for(const idx in this._series) {
+      if(this._series[idx].visible === false) {
+        continue;
+      }
+      const confidence = this._series[idx].confidence || 0;
+      const mode = this._series[idx].mode || Mode.STANDARD;
+      const target = this._series[idx].target;
+      this._renderMetric(
+        this._series[idx].datapoints,
+        { color: this.getSerieColor(Number(idx)), confidence, target, mode }
+      );
     }
   }
 
   _renderMetric(
     datapoints: number[][],
-    options: {
+    metricOptions: {
       color: string,
       confidence: number,
       target: string,
       mode: Mode
     }
   ): void {
-    if(_.includes(this.seriesTargetsWithBounds, options.target)) {
+    if(_.includes(this.seriesTargetsWithBounds, metricOptions.target)) {
       return;
     }
 
-    if(options.mode === Mode.CHARGE) {
+    if(metricOptions.mode === Mode.CHARGE) {
       const dataPairs = this._d3.pairs(datapoints);
       this._chartContainer.selectAll(null)
         .data(dataPairs)
@@ -73,7 +76,7 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
       .attr('class', 'metric-path')
       .attr('clip-path', `url(#${this.rectClipId})`)
       .attr('fill', 'none')
-      .attr('stroke', options.color)
+      .attr('stroke', metricOptions.color)
       .attr('stroke-width', 1)
       .attr('stroke-opacity', 0.7)
       .attr('d', lineGenerator);
@@ -86,10 +89,10 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
       this._options.bounds.lower !== undefined
     ) {
       this._series.forEach(serie => {
-        if(serie.target === this.formatedBound(this._options.bounds.upper, options.target)) {
+        if(serie.target === this.formatedBound(this._options.bounds.upper, metricOptions.target)) {
           upperBoundDatapoints = serie.datapoints;
         }
-        if(serie.target === this.formatedBound(this._options.bounds.lower, options.target)) {
+        if(serie.target === this.formatedBound(this._options.bounds.lower, metricOptions.target)) {
           lowerBoundDatapoints = serie.datapoints;
         }
       });
@@ -101,7 +104,7 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
 
       this._chartContainer.append('path')
         .datum(data)
-        .attr('fill', options.color)
+        .attr('fill', metricOptions.color)
         .attr('stroke', 'none')
         .attr('opacity', '0.3')
         .attr('d', this._d3.area()
@@ -111,16 +114,16 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
         )
     }
 
-    if(options.confidence > 0) {
+    if(metricOptions.confidence > 0) {
       this._chartContainer.append('path')
         .datum(datapoints)
-        .attr('fill', options.color)
+        .attr('fill', metricOptions.color)
         .attr('stroke', 'none')
         .attr('opacity', '0.3')
         .attr('d', this._d3.area()
           .x((d: [number, number]) => this.xScale(new Date(d[1])))
-          .y0((d: [number, number]) => this.yScale(d[0] + options.confidence))
-          .y1((d: [number, number]) => this.yScale(d[0] - options.confidence))
+          .y0((d: [number, number]) => this.yScale(d[0] + metricOptions.confidence))
+          .y1((d: [number, number]) => this.yScale(d[0] - metricOptions.confidence))
         )
     }
   }
@@ -180,7 +183,7 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
 
       series.push({
         value: this._series[i].datapoints[idx][0],
-        color: this._series[i].color,
+        color: this.getSerieColor(i),
         label: this._series[i].alias || this._series[i].target
       });
 
