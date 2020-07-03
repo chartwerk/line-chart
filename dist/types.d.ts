@@ -9,10 +9,4 @@ export declare enum Mode {
 }
 export declare type LineTimeSerie = TimeSerie & Partial<LineTimeSerieParams>;
 export declare type LineOptions = Options;
-export declare type RenderMetricOption = {
-    color: string;
-    confidence: number;
-    target: string;
-    mode: Mode;
-};
 export {};
