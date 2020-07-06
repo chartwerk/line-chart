@@ -1,6 +1,6 @@
 {
   "name": "@chartwerk/line-chart",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "Chartwerk line chart",
   "main": "dist/index.js",
   "scripts": {
