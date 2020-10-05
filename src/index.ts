@@ -174,7 +174,7 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
         this._series[i].visible === false ||
         _.includes(this.seriesTargetsWithBounds, this._series[i].target)
       ) {
-        this._crosshair.select(`#crosshair-circle-${i}`)
+        this._crosshair.selectAll(`.crosshair-circle-${i}`)
           .style('display', 'none');
         continue;
       }
@@ -187,7 +187,7 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
         label: this._series[i].alias || this._series[i].target
       });
 
-      this._crosshair.select(`#crosshair-circle-${i}`)
+      this._crosshair.selectAll(`.crosshair-circle-${i}`)
         .attr('cx', x)
         .attr('cy', y);
     }
