@@ -158,7 +158,8 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
     }
 
     const bisectDate = this._d3.bisector((d: [number, number]) => d[1]).left;
-    const mouseDate = this.xScale.invert(eventX).getTime();
+    // TODO: axis can be number or Date
+    const mouseDate = (this.xScale.invert(eventX) as Date).getTime();
 
     let idx = bisectDate(this._series[0].datapoints, mouseDate);
     if(
