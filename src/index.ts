@@ -15,6 +15,8 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
       this._renderNoDataPointsMessage();
       return;
     }
+    // TODO: temporary
+    this._updateCrosshairCircles();
     for(let idx = 0; idx < this._series.length; ++idx) {
       if(this._series[idx].visible === false) {
         continue;
@@ -128,12 +130,19 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
     }
   }
 
+  _updateCrosshairCircles(): void {
+    this._crosshair
+      .append('circle')
+      .attr('class', 'crosshair-circle')
+      .attr('r', 3);
+  }
+
   public renderSharedCrosshair(timestamp: number): void {
     this._crosshair.style('display', null);
     this._crosshair.selectAll('.crosshair-circle')
       .style('display', 'none');
 
-    const x = this.timestampScale(timestamp);
+    const x = this.xScale(timestamp);
     this._crosshair.select('#crosshair-line-x')
       .attr('y1', 0).attr('x1', x)
       .attr('y2', this.height).attr('x2', x);
@@ -159,7 +168,7 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
 
     const bisectDate = this._d3.bisector((d: [number, number]) => d[1]).left;
     // TODO: axis can be number or Date
-    const mouseDate = (this.xScale.invert(eventX) as Date).getTime();
+    const mouseDate = this.xScale.invert(eventX);
 
     let idx = bisectDate(this._series[0].datapoints, mouseDate);
     if(
@@ -181,22 +190,27 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
       }
       const y = this.yScale(this._series[i].datapoints[idx][0]);
       const x = this.xScale(this._series[i].datapoints[idx][1]);
-
       series.push({
         value: this._series[i].datapoints[idx][0],
         color: this.getSerieColor(i),
         label: this._series[i].alias || this._series[i].target
       });
 
-      this._crosshair.selectAll(`.crosshair-circle-${i}`)
+      this._crosshair.selectAll(`.crosshair-circle`)
         .attr('cx', x)
-        .attr('cy', y);
+        .attr('cy', y)
+        .attr('fill', this.getSerieColor(i));
+    }
+  
+    if(this._options.eventsCallbacks === undefined || this._options.eventsCallbacks.mouseMove === undefined) {
+      console.log('Mouse move, but there is no callback');
+      return;
     }
 
     this._options.eventsCallbacks.mouseMove({
       x: this._d3.event.clientX,
       y: this._d3.event.clientY,
-      time: this.timestampScale.invert(eventX),
+      time: this.xScale.invert(eventX),
       series,
       chartX: eventX,
       chartWidth: this.width
