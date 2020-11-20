@@ -9,6 +9,7 @@ export declare class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, Lin
         target: string;
         mode: Mode;
     }): void;
+    _updateCrosshairCircles(): void;
     renderSharedCrosshair(timestamp: number): void;
     hideSharedCrosshair(): void;
     onMouseMove(): void;
