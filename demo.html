@@ -10,7 +10,11 @@
     <div id="chart" style="width: 500px; height: 500px;"></div>
 
     <script type="text/javascript">
-      var pod = new ChartwerkLineChart(document.getElementById('chart'), [{ target: 'test', datapoints: [[100, 1590590148], [200, 1590591148], [100, 1590592148]] }]);
+      var pod = new ChartwerkLineChart(
+        document.getElementById('chart'),
+        [{ target: 'test', datapoints: [[100, 1590590148], [200, 1590591148], [100, 1590592148]] }],
+        { renderLegend: false, axis: { y: { invert: true }, x: { format: 'time' }}}
+      );
       pod.render();
     </script>
   </body>
