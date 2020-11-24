@@ -190,7 +190,7 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
       }
       const y = this.yScale(this._series[i].datapoints[idx][0]);
       const x = this.xScale(this._series[i].datapoints[idx][1]);
-      console.log('onMouseMove', this._series[i].datapoints[idx], idx, x, y);
+
       series.push({
         value: this._series[i].datapoints[idx][0],
         color: this.getSerieColor(i),
