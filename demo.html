@@ -13,7 +13,7 @@
       var pod = new ChartwerkLineChart(
         document.getElementById('chart'),
         [{ target: 'test', datapoints: [[100, 1590590148], [200, 1590591148], [100, 1590592148]] }],
-        { renderLegend: false, axis: { y: { invert: true }, x: { format: 'time' }}}
+        { renderLegend: false, usePanning: false, axis: { y: { invert: true, range: [0, 250] }, x: { format: 'numeric' }}}
       );
       pod.render();
     </script>

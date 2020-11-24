@@ -69,7 +69,7 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
     }
 
     const lineGenerator = this._d3.line()
-      .x((d: [number, number]) => this.xScale(new Date(d[1])))
+      .x((d: [number, number]) => this.xScale(d[1]))
       .y((d: [number, number]) => this.yScale(d[0]));
 
     this._chartContainer
@@ -110,7 +110,7 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
         .attr('stroke', 'none')
         .attr('opacity', '0.3')
         .attr('d', this._d3.area()
-          .x((d: number[]) => this.xScale(new Date(d[1])))
+          .x((d: number[]) => this.xScale(d[1]))
           .y0((d: number[]) => this.yScale(d[0]))
           .y1((d: number[]) => this.yScale(d[2]))
         )
@@ -123,7 +123,7 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
         .attr('stroke', 'none')
         .attr('opacity', '0.3')
         .attr('d', this._d3.area()
-          .x((d: [number, number]) => this.xScale(new Date(d[1])))
+          .x((d: [number, number]) => this.xScale(d[1]))
           .y0((d: [number, number]) => this.yScale(d[0] + metricOptions.confidence))
           .y1((d: [number, number]) => this.yScale(d[0] - metricOptions.confidence))
         )
@@ -190,6 +190,7 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
       }
       const y = this.yScale(this._series[i].datapoints[idx][0]);
       const x = this.xScale(this._series[i].datapoints[idx][1]);
+
       series.push({
         value: this._series[i].datapoints[idx][0],
         color: this.getSerieColor(i),
@@ -208,8 +209,8 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
     }
 
     this._options.eventsCallbacks.mouseMove({
-      x: this._d3.event.clientX,
-      y: this._d3.event.clientY,
+      x: this._d3.event.pageX,
+      y: this._d3.event.pageY,
       time: this.xScale.invert(eventX),
       series,
       chartX: eventX,
