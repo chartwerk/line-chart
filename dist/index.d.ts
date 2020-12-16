@@ -17,8 +17,9 @@ export declare class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, Lin
     moveCrosshairLine(xPosition: number): void;
     moveCrosshairCircle(xPosition: number, yPosition: number, serieIdx: number): void;
     hideCrosshairCircle(serieIdx: number): void;
-    getClosestDatapoint(serie: LineTimeSerie, xPosition: number): [number, number];
+    getClosestDatapoint(serie: LineTimeSerie, xValue: number): [number, number];
     getClosetIndex(datapoints: [number, number][], xValue: number): number;
+    get xValueInterval(): number;
     onMouseMove(): void;
     onMouseOver(): void;
     onMouseOut(): void;
