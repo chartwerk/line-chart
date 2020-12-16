@@ -185,7 +185,8 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
   moveCrosshairCircle(xPosition: number, yPosition: number, serieIdx: number): void {
     this._crosshair.selectAll(`.crosshair-circle-${serieIdx}`)
       .attr('cx', xPosition)
-      .attr('cy', yPosition);
+      .attr('cy', yPosition)
+      .style('display', null);
   }
 
   hideCrosshairCircle(serieIdx: number): void {
@@ -194,11 +195,9 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
       .style('display', 'none');
   }
 
-  getClosestDatapoint(serie: LineTimeSerie, xPosition: number): [number, number] {
-    // xPosition - chart x-coordinate
-    // get closest datapoint to the "xPosition" in the "serie"
+  getClosestDatapoint(serie: LineTimeSerie, xValue: number): [number, number] {
+    // get closest datapoint to the "xValue" in the "serie"
     const datapoints = serie.datapoints;
-    const xValue = this.xScale.invert(xPosition);
     const closestIdx = this.getClosetIndex(datapoints, xValue);
     const datapoint = serie.datapoints[closestIdx];
     return datapoint;
@@ -226,6 +225,19 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
     return closestIdx;
   }
 
+  get xValueInterval(): number {
+    // TODO: move it to base instead of timeInterval
+    // inverval: x value interval between data points
+    const itervals = _.map(this._series, serie => {
+      const startX = _.head(serie.datapoints)[1];
+      const endX = _.last(serie.datapoints)[1];
+      const xRange = Math.abs(endX - startX);
+      const interval = xRange / (serie.datapoints.length - 1);
+      return interval;
+    });
+    return _.max(itervals);
+  }
+
   onMouseMove(): void {
     const eventX = this._d3.mouse(this._chartContainer.node())[0];
     // TODO: isOutOfChart is a hack, use clip path correctly
@@ -249,14 +261,22 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
         this.hideCrosshairCircle(serieIdx);
         return;
       }
-      // TODO: add smth like voronoi
-      const closetDatapoint = this.getClosestDatapoint(serie, eventX);
-      const yPosition = this.yScale(closetDatapoint[0]);
-      const xPosition = this.xScale(closetDatapoint[1]);
+      const xValue = this.xScale.invert(eventX); // mouse x position in xScale
+      const closestDatapoint = this.getClosestDatapoint(serie, xValue);
+      
+      const range = Math.abs(closestDatapoint[1] - xValue);
+      const interval = this.xValueInterval / 2; // half interval betwwen points
+      // do not move crosshair circles, it mouse to far from closest point
+      if(range > interval) {
+        this.hideCrosshairCircle(serieIdx);
+        return;
+      }
+      const yPosition = this.yScale(closestDatapoint[0]);
+      const xPosition = this.xScale(closestDatapoint[1]);
       this.moveCrosshairCircle(xPosition, yPosition, serieIdx);
 
       points.push({
-        value: closetDatapoint[0],
+        value: closestDatapoint[0],
         color: this.getSerieColor(serieIdx),
         label: serie.alias || serie.target
       });
