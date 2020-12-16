@@ -11,12 +11,13 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
   }
 
   _renderMetrics(): void {
+    // TODO: seems that renderMetrics is not correct name 
     if(this._series.length === 0) {
       this._renderNoDataPointsMessage();
       return;
     }
-    // TODO: temporary
-    this._updateCrosshairCircles();
+    this.updateCrosshair();
+
     for(let idx = 0; idx < this._series.length; ++idx) {
       if(this._series[idx].visible === false) {
         continue;
@@ -130,11 +131,34 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
     }
   }
 
-  _updateCrosshairCircles(): void {
+  updateCrosshair(): void {
+    // Base don't know anything about crosshair circles, It is only for line pod
+    this.appendCrosshairCircles();
+  }
+
+  appendCrosshairCircles(): void {
+    // circle for each serie
+    this._series.forEach((serie: LineTimeSerie, serieIdx: number) => {
+      this.appendCrosshairCircle(serieIdx);
+    });
+  }
+
+  appendCrosshairCircle(serieIdx: number): void {
+    this._crosshair.append('circle')
+      .attr('class', `crosshair-circle-${serieIdx} crosshair-background`)
+      .attr('r', 9)
+      .attr('clip-path', `url(#${this.rectClipId})`)
+      .attr('fill', this.getSerieColor(serieIdx))
+      .style('opacity', 0.3)
+      .style('pointer-events', 'none');
+    
     this._crosshair
       .append('circle')
-      .attr('class', 'crosshair-circle')
-      .attr('r', 3);
+      .attr('class', `crosshair-circle-${serieIdx}`)
+      .attr('clip-path', `url(#${this.rectClipId})`)
+      .attr('fill', this.getSerieColor(serieIdx))
+      .attr('r', 3)
+      .style('pointer-events', 'none');
   }
 
   public renderSharedCrosshair(timestamp: number): void {
@@ -152,67 +176,103 @@ export class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions
     this._crosshair.style('display', 'none');
   }
 
+  moveCrosshairLine(xPosition: number): void {
+    this._crosshair.select('#crosshair-line-x')
+      .attr('x1', xPosition)
+      .attr('x2', xPosition);
+  }
+
+  moveCrosshairCircle(xPosition: number, yPosition: number, serieIdx: number): void {
+    this._crosshair.selectAll(`.crosshair-circle-${serieIdx}`)
+      .attr('cx', xPosition)
+      .attr('cy', yPosition);
+  }
+
+  hideCrosshairCircle(serieIdx: number): void {
+    // hide circle for singe serie
+    this._crosshair.selectAll(`.crosshair-circle-${serieIdx}`)
+      .style('display', 'none');
+  }
+
+  getClosestDatapoint(serie: LineTimeSerie, xPosition: number): [number, number] {
+    // xPosition - chart x-coordinate
+    // get closest datapoint to the "xPosition" in the "serie"
+    const datapoints = serie.datapoints;
+    const xValue = this.xScale.invert(xPosition);
+    const closestIdx = this.getClosetIndex(datapoints, xValue);
+    const datapoint = serie.datapoints[closestIdx];
+    return datapoint;
+  }
+
+  getClosetIndex(datapoints: [number, number][], xValue: number): number {
+    // TODO: d3.bisect is not the best way. Use binary search
+    const bisectIndex = this._d3.bisector((d: [number, number]) => d[1]).left;
+    let closestIdx = bisectIndex(datapoints, xValue);
+    // TODO: refactor corner cases
+    if(closestIdx < 0) {
+      return 0;      
+    }
+    if(closestIdx >= datapoints.length) {
+      return datapoints.length - 1;
+    }
+    // TODO: do we realy need it? Binary search should fix it
+    if(
+      closestIdx > 0 &&
+      Math.abs(xValue - datapoints[closestIdx - 1][1]) <
+      Math.abs(xValue - datapoints[closestIdx][1])
+    ) {
+      closestIdx -= 1;
+    }
+    return closestIdx;
+  }
+
   onMouseMove(): void {
     const eventX = this._d3.mouse(this._chartContainer.node())[0];
+    // TODO: isOutOfChart is a hack, use clip path correctly
     if(this.isOutOfChart() === true) {
       this._crosshair.style('display', 'none');
       return;
     }
-    this._crosshair.select('#crosshair-line-x')
-      .attr('x1', eventX)
-      .attr('x2', eventX);
+    this.moveCrosshairLine(eventX);
 
     if(this._series === undefined || this._series.length === 0) {
       return;
     }
 
-    const bisectDate = this._d3.bisector((d: [number, number]) => d[1]).left;
-    // TODO: axis can be number or Date
-    const mouseDate = this.xScale.invert(eventX);
-
-    let idx = bisectDate(this._series[0].datapoints, mouseDate);
-    if(
-      Math.abs(mouseDate - this._series[0].datapoints[idx - 1][1]) <
-      Math.abs(mouseDate - this._series[0].datapoints[idx][1])
-    ) {
-      idx -= 1;
-    }
-
-    const series: any[] = [];
-    for(let i = 0; i < this._series.length; i++) {
+    // TODO: not clear what points is, refactor mouse move callback
+    let points = [];
+    this._series.forEach((serie: LineTimeSerie, serieIdx: number) => {
       if(
-        this._series[i].visible === false ||
-        _.includes(this.seriesTargetsWithBounds, this._series[i].target)
+        serie.visible === false ||
+        _.includes(this.seriesTargetsWithBounds, serie.target)
       ) {
-        this._crosshair.selectAll(`.crosshair-circle-${i}`)
-          .style('display', 'none');
-        continue;
+        this.hideCrosshairCircle(serieIdx);
+        return;
       }
-      const y = this.yScale(this._series[i].datapoints[idx][0]);
-      const x = this.xScale(this._series[i].datapoints[idx][1]);
+      // TODO: add smth like voronoi
+      const closetDatapoint = this.getClosestDatapoint(serie, eventX);
+      const yPosition = this.yScale(closetDatapoint[0]);
+      const xPosition = this.xScale(closetDatapoint[1]);
+      this.moveCrosshairCircle(xPosition, yPosition, serieIdx);
 
-      series.push({
-        value: this._series[i].datapoints[idx][0],
-        color: this.getSerieColor(i),
-        label: this._series[i].alias || this._series[i].target
+      points.push({
+        value: closetDatapoint[0],
+        color: this.getSerieColor(serieIdx),
+        label: serie.alias || serie.target
       });
-
-      this._crosshair.selectAll(`.crosshair-circle`)
-        .attr('cx', x)
-        .attr('cy', y)
-        .attr('fill', this.getSerieColor(i));
-    }
+    });
   
     if(this._options.eventsCallbacks === undefined || this._options.eventsCallbacks.mouseMove === undefined) {
       console.log('Mouse move, but there is no callback');
       return;
     }
 
+    // TODO: need to refactor this object
     this._options.eventsCallbacks.mouseMove({
       x: this._d3.event.pageX,
       y: this._d3.event.pageY,
       time: this.xScale.invert(eventX),
-      series,
+      series: points,
       chartX: eventX,
       chartWidth: this.width
     });
