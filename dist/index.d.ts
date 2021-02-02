@@ -1,8 +1,8 @@
-import { ChartwerkBase, TickOrientation, TimeFormat } from '@chartwerk/base';
+import { ChartwerkPod, TickOrientation, TimeFormat } from '@chartwerk/base';
 import { LineTimeSerie, LineOptions, Mode } from './types';
-export declare class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions> {
-    constructor(el: HTMLElement, _series?: LineTimeSerie[], _options?: LineOptions);
-    _renderMetrics(): void;
+export declare class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions> {
+    constructor(_el: HTMLElement, _series?: LineTimeSerie[], _options?: LineOptions);
+    renderMetrics(): void;
     _renderMetric(datapoints: number[][], metricOptions: {
         color: string;
         confidence: number;
