@@ -1,17 +1,25 @@
-import { ChartwerkBase, TickOrientation, TimeFormat } from '@chartwerk/base';
+import { ChartwerkPod, TickOrientation, TimeFormat } from '@chartwerk/core';
 import { LineTimeSerie, LineOptions, Mode } from './types';
-export declare class ChartwerkLineChart extends ChartwerkBase<LineTimeSerie, LineOptions> {
-    constructor(el: HTMLElement, _series?: LineTimeSerie[], _options?: LineOptions);
-    _renderMetrics(): void;
+export declare class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions> {
+    constructor(_el: HTMLElement, _series?: LineTimeSerie[], _options?: LineOptions);
+    renderMetrics(): void;
     _renderMetric(datapoints: number[][], metricOptions: {
         color: string;
         confidence: number;
         target: string;
         mode: Mode;
     }): void;
-    _updateCrosshairCircles(): void;
+    updateCrosshair(): void;
+    appendCrosshairCircles(): void;
+    appendCrosshairCircle(serieIdx: number): void;
     renderSharedCrosshair(timestamp: number): void;
     hideSharedCrosshair(): void;
+    moveCrosshairLine(xPosition: number): void;
+    moveCrosshairCircle(xPosition: number, yPosition: number, serieIdx: number): void;
+    hideCrosshairCircle(serieIdx: number): void;
+    getClosestDatapoint(serie: LineTimeSerie, xValue: number): [number, number];
+    getClosestIndex(datapoints: [number, number][], xValue: number): number;
+    get xValueInterval(): number | undefined;
     onMouseMove(): void;
     onMouseOver(): void;
     onMouseOut(): void;
@@ -50,6 +58,8 @@ export declare const VueChartwerkLineChartObject: {
             mouseMove(evt: any): void;
             mouseOut(): void;
             onLegendClick(idx: any): void;
+            panningEnd(range: any): void;
+            contextMenu(evt: any): void;
         };
     }[];
     methods: {
