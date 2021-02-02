@@ -4,6 +4,9 @@ import { LineTimeSerie, LineOptions, Mode } from './types';
 import * as d3 from 'd3';
 import * as _ from 'lodash';
 
+const CROSSHAIR_CIRCLE_RADIUS = 3;
+const CROSSHAIR_BACKGROUND_RAIDUS = 9;
+const CROSSHAIR_BACKGROUND_OPACITY = 0.3;
 
 export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions> {
   constructor(_el: HTMLElement, _series: LineTimeSerie[] = [], _options: LineOptions = {}) {
@@ -146,10 +149,10 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
   appendCrosshairCircle(serieIdx: number): void {
     this.crosshair.append('circle')
       .attr('class', `crosshair-circle-${serieIdx} crosshair-background`)
-      .attr('r', 9)
+      .attr('r', CROSSHAIR_BACKGROUND_RAIDUS)
       .attr('clip-path', `url(#${this.rectClipId})`)
       .attr('fill', this.getSerieColor(serieIdx))
-      .style('opacity', 0.3)
+      .style('opacity', CROSSHAIR_BACKGROUND_OPACITY)
       .style('pointer-events', 'none');
     
     this.crosshair
@@ -157,7 +160,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       .attr('class', `crosshair-circle-${serieIdx}`)
       .attr('clip-path', `url(#${this.rectClipId})`)
       .attr('fill', this.getSerieColor(serieIdx))
-      .attr('r', 3)
+      .attr('r', CROSSHAIR_CIRCLE_RADIUS)
       .style('pointer-events', 'none');
   }
 
@@ -198,12 +201,12 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
   getClosestDatapoint(serie: LineTimeSerie, xValue: number): [number, number] {
     // get closest datapoint to the "xValue" in the "serie"
     const datapoints = serie.datapoints;
-    const closestIdx = this.getClosetIndex(datapoints, xValue);
+    const closestIdx = this.getClosestIndex(datapoints, xValue);
     const datapoint = serie.datapoints[closestIdx];
     return datapoint;
   }
 
-  getClosetIndex(datapoints: [number, number][], xValue: number): number {
+  getClosestIndex(datapoints: [number, number][], xValue: number): number {
     // TODO: d3.bisect is not the best way. Use binary search
     const bisectIndex = this.d3.bisector((d: [number, number]) => d[1]).left;
     let closestIdx = bisectIndex(datapoints, xValue);
@@ -225,17 +228,20 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
     return closestIdx;
   }
 
-  get xValueInterval(): number {
+  get xValueInterval(): number | undefined {
     // TODO: move it to base instead of timeInterval
     // inverval: x value interval between data points
-    const itervals = _.map(this.series, serie => {
+    const intervals = _.map(this.series, serie => {
+      if(serie.datapoints.length < 2) {
+        return undefined;
+      }
       const startX = _.head(serie.datapoints)[1];
       const endX = _.last(serie.datapoints)[1];
       const xRange = Math.abs(endX - startX);
       const interval = xRange / (serie.datapoints.length - 1);
       return interval;
     });
-    return _.max(itervals);
+    return _.max(intervals);
   }
 
   onMouseMove(): void {
@@ -263,11 +269,15 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       }
       const xValue = this.xScale.invert(eventX); // mouse x position in xScale
       const closestDatapoint = this.getClosestDatapoint(serie, xValue);
-      
+      if(closestDatapoint === undefined) {
+        this.hideCrosshairCircle(serieIdx);
+        return;
+      }
+
       const range = Math.abs(closestDatapoint[1] - xValue);
-      const interval = this.xValueInterval / 2; // half interval betwwen points
+      const interval = this.xValueInterval; // interval between points
       // do not move crosshair circles, it mouse to far from closest point
-      if(range > interval) {
+      if(interval === undefined || range > interval / 2) {
         this.hideCrosshairCircle(serieIdx);
         return;
       }
