@@ -1,4 +1,4 @@
-import { ChartwerkPod, VueChartwerkPodMixin, TickOrientation, TimeFormat } from '@chartwerk/base';
+import { ChartwerkPod, VueChartwerkPodMixin, TickOrientation, TimeFormat } from '@chartwerk/core';
 import { LineTimeSerie, LineOptions, Mode } from './types';
 
 import * as d3 from 'd3';
