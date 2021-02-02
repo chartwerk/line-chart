@@ -18,8 +18,8 @@ export declare class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, Line
     moveCrosshairCircle(xPosition: number, yPosition: number, serieIdx: number): void;
     hideCrosshairCircle(serieIdx: number): void;
     getClosestDatapoint(serie: LineTimeSerie, xValue: number): [number, number];
-    getClosetIndex(datapoints: [number, number][], xValue: number): number;
-    get xValueInterval(): number;
+    getClosestIndex(datapoints: [number, number][], xValue: number): number;
+    get xValueInterval(): number | undefined;
     onMouseMove(): void;
     onMouseOver(): void;
     onMouseOut(): void;
