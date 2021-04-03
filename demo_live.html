@@ -13,39 +13,34 @@
 
   <script type="text/javascript">
     const startTime = 1590590148;
-    const arrayLength = 20;
+    const arrayLength = 100;
     const data1 = Array.from({ length: arrayLength }, (el, idx) => [Math.floor(Math.random() * 40), startTime + idx * 10000]);
     const data2 = Array.from({ length: arrayLength }, (el, idx) => [Math.floor(Math.random() * 100), startTime + idx * 10000]);
     const data3 = Array.from({ length: arrayLength }, (el, idx) => [Math.floor(Math.random() * 20) + 90, startTime + idx * 10000]);
-    console.log('a');
+    let options = { renderLegend: false, usePanning: false, axis: { y: { invert: false, range: [0, 350] }, x: { format: 'time' } } };
     var pod = new ChartwerkLineChart(
       document.getElementById('chart'),
       [
         { target: 'test1', datapoints: data1, color: 'green' },
         { target: 'test2', datapoints: data2, color: 'blue' },
         { target: 'test3', datapoints: data3, color: 'orange' },
-        // { target: 'test2', datapoints: [[100, 1590590148], [200, 1590692148], [100, 1590794148]], color: 'blue' }
       ],
-      { renderLegend: false, usePanning: false, axis: { y: { invert: false, range: [0, 350] }, x: { format: 'time' } } }
+      options
     );
     pod.render();
     let rerenderIdx = arrayLength;
-    setInterval(() => {
-      console.log('rerender');
+    var test = setInterval(() => {
       rerenderIdx += 1;
-      data1.push([Math.floor(Math.random() * 40), startTime + rerenderIdx * 10000]);
-      data2.push([Math.floor(Math.random() * 100), startTime + rerenderIdx * 10000]);
-      data3.push([Math.floor(Math.random() * 20) + 90, startTime + rerenderIdx * 10000]);
-      if (data1.length > arrayLength) {
-        data1.shift();
+      const d1 = [Math.floor(Math.random() * 40), startTime + rerenderIdx * 10000];
+      const d2 = [Math.floor(Math.random() * 100), startTime + rerenderIdx * 10000];
+      const d3 = [Math.floor(Math.random() * 20) + 90, startTime + rerenderIdx * 10000];
+
+      console.time('rerender');
+      pod.appendData([d1, d2, d3], arrayLength);
+      console.timeEnd('rerender');
+      if(rerenderIdx > arrayLength + 100) {
+        clearInterval(test);
       }
-      if (data2.length > arrayLength) {
-        data2.shift();
-      }
-      if (data3.length > arrayLength) {
-        data3.shift();
-      }
-      pod.render();
     }, 1000);
   </script>
 </body>

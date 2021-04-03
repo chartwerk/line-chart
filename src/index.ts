@@ -9,6 +9,8 @@ const CROSSHAIR_BACKGROUND_RAIDUS = 9;
 const CROSSHAIR_BACKGROUND_OPACITY = 0.3;
 
 export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions> {
+  lineGenerator = null;
+
   constructor(_el: HTMLElement, _series: LineTimeSerie[] = [], _options: LineOptions = {}) {
     super(d3, _el, _series, _options);
   }
@@ -20,6 +22,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       return;
     }
     this.updateCrosshair();
+    this.initLineGenerator();
 
     for(let idx = 0; idx < this.series.length; ++idx) {
       if(this.series[idx].visible === false) {
@@ -30,9 +33,36 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       const target = this.series[idx].target;
       this._renderMetric(
         this.series[idx].datapoints,
-        { color: this.getSerieColor(idx), confidence, target, mode }
+        { color: this.getSerieColor(idx), confidence, target, mode, serieIdx: idx }
       );
     }
+  }
+
+  initLineGenerator(): void {
+    this.lineGenerator = this.d3.line()
+      .x(d => this.xScale(d[1]))
+      .y(d => this.yScale(d[0]));
+  }
+
+  public appendData(data: [number, number][], maxLenth: number): void {
+    this.clearScaleCache();
+
+    for(let idx = 0; idx < this.series.length; ++idx) {
+      if(this.series[idx].visible === false) {
+        continue;
+      }
+      this.series[idx].datapoints.push(data[idx]);
+      if(this.series[idx].datapoints.length > maxLenth) {
+        this.series[idx].datapoints.shift();
+      }
+      this.chartContainer.select(`.metric-path-${idx}`)
+        .datum(this.series[idx].datapoints)
+        .attr('d', this.lineGenerator);
+    }
+
+    this.renderXAxis();
+    this.renderYAxis();
+    this.renderGrid();
   }
 
   _renderMetric(
@@ -41,7 +71,8 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       color: string,
       confidence: number,
       target: string,
-      mode: Mode
+      mode: Mode,
+      serieIdx: number
     }
   ): void {
     if(_.includes(this.seriesTargetsWithBounds, metricOptions.target)) {
@@ -72,20 +103,16 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       return;
     }
 
-    const lineGenerator = this.d3.line()
-      .x((d: [number, number]) => this.xScale(d[1]))
-      .y((d: [number, number]) => this.yScale(d[0]));
-
     this.chartContainer
       .append('path')
       .datum(datapoints)
-      .attr('class', 'metric-path')
+      .attr('class', `metric-path-${metricOptions.serieIdx}`)
       .attr('clip-path', `url(#${this.rectClipId})`)
       .attr('fill', 'none')
       .attr('stroke', metricOptions.color)
       .attr('stroke-width', 1)
       .attr('stroke-opacity', 0.7)
-      .attr('d', lineGenerator);
+      .attr('d', this.lineGenerator);
 
     let upperBoundDatapoints = [];
     let lowerBoundDatapoints = [];
