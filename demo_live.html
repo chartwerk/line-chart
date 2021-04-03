@@ -21,9 +21,9 @@
     var pod = new ChartwerkLineChart(
       document.getElementById('chart'),
       [
-        { target: 'test1', datapoints: data1, color: 'green' },
-        { target: 'test2', datapoints: data2, color: 'blue' },
-        { target: 'test3', datapoints: data3, color: 'orange' },
+        { target: 'test1', datapoints: data1, color: 'green', maxLength: arrayLength + 30 },
+        { target: 'test2', datapoints: data2, color: 'blue', maxLength: arrayLength + 30 },
+        { target: 'test3', datapoints: data3, color: 'orange', maxLength: arrayLength + 30 },
       ],
       options
     );
@@ -36,7 +36,7 @@
       const d3 = [Math.floor(Math.random() * 20) + 90, startTime + rerenderIdx * 10000];
 
       console.time('rerender');
-      pod.appendData([d1, d2, d3], arrayLength);
+      pod.appendData([d1, d2, d3]);
       console.timeEnd('rerender');
       if(rerenderIdx > arrayLength + 100) {
         clearInterval(test);

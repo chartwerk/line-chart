@@ -44,7 +44,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       .y(d => this.yScale(d[0]));
   }
 
-  public appendData(data: [number, number][], maxLenth: number): void {
+  public appendData(data: [number, number][]): void {
     this.clearScaleCache();
 
     for(let idx = 0; idx < this.series.length; ++idx) {
@@ -52,7 +52,8 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
         continue;
       }
       this.series[idx].datapoints.push(data[idx]);
-      if(this.series[idx].datapoints.length > maxLenth) {
+      const maxLength = this.series[idx].maxLength;
+      if(maxLength !== undefined && this.series[idx].datapoints.length > maxLength) {
         this.series[idx].datapoints.shift();
       }
       this.chartContainer.select(`.metric-path-${idx}`)

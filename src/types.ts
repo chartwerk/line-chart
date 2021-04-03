@@ -2,7 +2,8 @@ import { TimeSerie, Options } from '@chartwerk/core';
 
 type LineTimeSerieParams = {
   confidence: number,
-  mode: Mode
+  mode: Mode,
+  maxLength: number
 }
 export enum Mode {
   STANDARD = 'Standard',
