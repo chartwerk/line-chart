@@ -16,13 +16,14 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
   }
 
   renderMetrics(): void {
+    this.updateCrosshair();
+    this.initLineGenerator();
+
     // TODO: seems that renderMetrics is not correct name 
     if(this.series.length === 0) {
       this.renderNoDataPointsMessage();
       return;
     }
-    this.updateCrosshair();
-    this.initLineGenerator();
 
     for(let idx = 0; idx < this.series.length; ++idx) {
       if(this.series[idx].visible === false) {
@@ -56,6 +57,9 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       if(maxLength !== undefined && this.series[idx].datapoints.length > maxLength) {
         this.series[idx].datapoints.shift();
       }
+    }
+
+    for(let idx = 0; idx < this.series.length; ++idx) {
       this.chartContainer.select(`.metric-path-${idx}`)
         .datum(this.series[idx].datapoints)
         .attr('d', this.lineGenerator);
