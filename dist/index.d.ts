@@ -12,6 +12,7 @@ export declare class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, Line
         target: string;
         mode: Mode;
         serieIdx: number;
+        renderDots: boolean;
     }): void;
     updateCrosshair(): void;
     appendCrosshairCircles(): void;

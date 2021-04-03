@@ -3,6 +3,7 @@ declare type LineTimeSerieParams = {
     confidence: number;
     mode: Mode;
     maxLength: number;
+    renderDots: boolean;
 };
 export declare enum Mode {
     STANDARD = "Standard",
