@@ -59,6 +59,7 @@ export declare const VueChartwerkLineChartObject: {
             mouseOut(): void;
             onLegendClick(idx: any): void;
             panningEnd(range: any): void;
+            panning(range: any): void;
             contextMenu(evt: any): void;
         };
     }[];

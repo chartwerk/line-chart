@@ -15,7 +15,7 @@
   "author": "CorpGlory",
   "license": "Apache-2.0",
   "dependencies": {
-    "@chartwerk/core": "github:chartwerk/core#dist"
+    "@chartwerk/core": "github:chartwerk/core#f50d521b3c6b3417af179261ec95dcc46fee6c81"
   },
   "devDependencies": {
     "@types/d3": "5.16.4",
