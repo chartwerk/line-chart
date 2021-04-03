@@ -21,9 +21,9 @@
     var pod = new ChartwerkLineChart(
       document.getElementById('chart'),
       [
-        { target: 'test1', datapoints: data1, color: 'green', maxLength: arrayLength + 30 },
-        { target: 'test2', datapoints: data2, color: 'blue', maxLength: arrayLength + 30 },
-        { target: 'test3', datapoints: data3, color: 'orange', maxLength: arrayLength + 30 },
+        { target: 'test1', datapoints: data1, color: 'green', maxLength: arrayLength + 30, renderDots: true },
+        { target: 'test2', datapoints: data2, color: 'blue', maxLength: arrayLength + 30, renderDots: true },
+        { target: 'test3', datapoints: data3, color: 'orange', maxLength: arrayLength + 30, renderDots: true },
       ],
       options
     );

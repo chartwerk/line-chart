@@ -4,6 +4,7 @@ import { LineTimeSerie, LineOptions, Mode } from './types';
 import * as d3 from 'd3';
 import * as _ from 'lodash';
 
+const METRIC_CIRCLE_RADIUS = 1.5;
 const CROSSHAIR_CIRCLE_RADIUS = 3;
 const CROSSHAIR_BACKGROUND_RAIDUS = 9;
 const CROSSHAIR_BACKGROUND_OPACITY = 0.3;
@@ -19,7 +20,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
     this.updateCrosshair();
     this.initLineGenerator();
 
-    // TODO: seems that renderMetrics is not correct name 
+    // TODO: seems that renderMetrics is not correct name
     if(this.series.length === 0) {
       this.renderNoDataPointsMessage();
       return;
@@ -32,9 +33,18 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       const confidence = this.series[idx].confidence || 0;
       const mode = this.series[idx].mode || Mode.STANDARD;
       const target = this.series[idx].target;
+      const renderDots = this.series[idx].renderDots !== undefined ? this.series[idx].renderDots : false;
+
       this._renderMetric(
         this.series[idx].datapoints,
-        { color: this.getSerieColor(idx), confidence, target, mode, serieIdx: idx }
+        {
+          color: this.getSerieColor(idx),
+          confidence,
+          target,
+          mode,
+          serieIdx: idx,
+          renderDots
+        }
       );
     }
   }
@@ -63,11 +73,34 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       this.chartContainer.select(`.metric-path-${idx}`)
         .datum(this.series[idx].datapoints)
         .attr('d', this.lineGenerator);
+
+      if(this.series[idx].renderDots === true) {
+        this.chartContainer.selectAll(`.metric-circle-${idx}`)
+          .data(this.series[idx].datapoints)
+          .attr('cx', d => this.xScale(d[1]))
+          .attr('cy', d => this.yScale(d[0]));
+
+        this._renderDots([data[idx]], idx);
+      }
     }
 
     this.renderXAxis();
     this.renderYAxis();
     this.renderGrid();
+  }
+
+  _renderDots(datapoints: number[][], serieIdx: number): void {
+    this.chartContainer.selectAll(null)
+      .data(datapoints)
+      .enter()
+      .append('circle')
+      .attr('class', `metric-circle-${serieIdx}`)
+      .attr('clip-path', `url(#${this.rectClipId})`)
+      .attr('fill', this.getSerieColor(serieIdx))
+      .attr('r', METRIC_CIRCLE_RADIUS)
+      .style('pointer-events', 'none')
+      .attr('cx', d => this.xScale(d[1]))
+      .attr('cy', d => this.yScale(d[0]));
   }
 
   _renderMetric(
@@ -77,7 +110,8 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       confidence: number,
       target: string,
       mode: Mode,
-      serieIdx: number
+      serieIdx: number,
+      renderDots: boolean
     }
   ): void {
     if(_.includes(this.seriesTargetsWithBounds, metricOptions.target)) {
@@ -118,6 +152,10 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       .attr('stroke-width', 1)
       .attr('stroke-opacity', 0.7)
       .attr('d', this.lineGenerator);
+
+    if(metricOptions.renderDots === true) {
+      this._renderDots(datapoints, metricOptions.serieIdx);
+    }
 
     let upperBoundDatapoints = [];
     let lowerBoundDatapoints = [];
@@ -186,7 +224,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       .attr('fill', this.getSerieColor(serieIdx))
       .style('opacity', CROSSHAIR_BACKGROUND_OPACITY)
       .style('pointer-events', 'none');
-    
+
     this.crosshair
       .append('circle')
       .attr('class', `crosshair-circle-${serieIdx}`)
@@ -244,7 +282,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
     let closestIdx = bisectIndex(datapoints, xValue);
     // TODO: refactor corner cases
     if(closestIdx < 0) {
-      return 0;      
+      return 0;
     }
     if(closestIdx >= datapoints.length) {
       return datapoints.length - 1;
@@ -323,7 +361,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
         label: serie.alias || serie.target
       });
     });
-  
+
     if(this.options.eventsCallbacks === undefined || this.options.eventsCallbacks.mouseMove === undefined) {
       console.log('Mouse move, but there is no callback');
       return;
