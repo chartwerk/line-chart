@@ -3,7 +3,8 @@ import { TimeSerie, Options } from '@chartwerk/core';
 type LineTimeSerieParams = {
   confidence: number,
   mode: Mode,
-  maxLength: number
+  maxLength: number,
+  renderDots: boolean
 }
 export enum Mode {
   STANDARD = 'Standard',
