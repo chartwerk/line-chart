@@ -1,13 +1,17 @@
 import { ChartwerkPod, TickOrientation, TimeFormat } from '@chartwerk/core';
 import { LineTimeSerie, LineOptions, Mode } from './types';
 export declare class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions> {
+    lineGenerator: any;
     constructor(_el: HTMLElement, _series?: LineTimeSerie[], _options?: LineOptions);
     renderMetrics(): void;
+    initLineGenerator(): void;
+    appendData(data: [number, number][]): void;
     _renderMetric(datapoints: number[][], metricOptions: {
         color: string;
         confidence: number;
         target: string;
         mode: Mode;
+        serieIdx: number;
     }): void;
     updateCrosshair(): void;
     appendCrosshairCircles(): void;
