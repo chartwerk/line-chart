@@ -80,24 +80,27 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
           .attr('cx', d => this.xScale(d[1]))
           .attr('cy', d => this.yScale(d[0]));
 
-        // TODO: remove duplication
-        this.chartContainer.selectAll(null)
-          .data(data[idx])
-          .enter()
-          .append('circle')
-          .attr('class', `metric-circle-${idx}`)
-          .attr('clip-path', `url(#${this.rectClipId})`)
-          .attr('fill', this.getSerieColor(idx))
-          .attr('r', METRIC_CIRCLE_RADIUS)
-          .style('pointer-events', 'none')
-          .attr('cx', d => this.xScale(d[1]))
-          .attr('cy', d => this.yScale(d[0]));
+        this._renderDots([data[idx]], idx);
       }
     }
 
     this.renderXAxis();
     this.renderYAxis();
     this.renderGrid();
+  }
+
+  _renderDots(datapoints: number[][], serieIdx: number): void {
+    this.chartContainer.selectAll(null)
+      .data(datapoints)
+      .enter()
+      .append('circle')
+      .attr('class', `metric-circle-${serieIdx}`)
+      .attr('clip-path', `url(#${this.rectClipId})`)
+      .attr('fill', this.getSerieColor(serieIdx))
+      .attr('r', METRIC_CIRCLE_RADIUS)
+      .style('pointer-events', 'none')
+      .attr('cx', d => this.xScale(d[1]))
+      .attr('cy', d => this.yScale(d[0]));
   }
 
   _renderMetric(
@@ -151,17 +154,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       .attr('d', this.lineGenerator);
 
     if(metricOptions.renderDots === true) {
-      this.chartContainer.selectAll(null)
-        .data(datapoints)
-        .enter()
-        .append('circle')
-        .attr('class', `metric-circle-${metricOptions.serieIdx}`)
-        .attr('clip-path', `url(#${this.rectClipId})`)
-        .attr('fill', this.getSerieColor(metricOptions.serieIdx))
-        .attr('r', METRIC_CIRCLE_RADIUS)
-        .style('pointer-events', 'none')
-        .attr('cx', d => this.xScale(d[1]))
-        .attr('cy', d => this.yScale(d[0]));
+      this._renderDots(datapoints, metricOptions.serieIdx);
     }
 
     let upperBoundDatapoints = [];

@@ -6,6 +6,7 @@ export declare class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, Line
     renderMetrics(): void;
     initLineGenerator(): void;
     appendData(data: [number, number][]): void;
+    _renderDots(datapoints: number[][], serieIdx: number): void;
     _renderMetric(datapoints: number[][], metricOptions: {
         color: string;
         confidence: number;
