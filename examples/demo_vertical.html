@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+
+    <script src="../dist/index.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="chart" style="width: 500px; height: 500px;"></div>
+
+    <script type="text/javascript">
+      const startTime = 1590590148;
+      const arrayLength = 20;
+      const data1 = createDatapoints(arrayLength, startTime, 40);
+      const data2 = createDatapoints(arrayLength, startTime, 30, 50);
+      const data3 = createDatapoints(arrayLength, startTime, 20, 90);
+
+      let options = {
+        renderLegend: false,
+        axis: {
+          y: { invert: true, valueFormatter: timeValueFormatter },
+          x: { format: 'numeric' }
+        },
+        zoomEvents: {
+          pan: { isActive: false },
+          brush: { isActive: true, orientation: 'vertical', keyEvent: 'main' }
+        },
+        eventsCallbacks: { zoomIn: zoomIn, zoomOut },
+        crosshair: { orientation: 'horizontal' },
+        margin: { top: 30, right: 20, bottom: 20, left: 50 }
+      }
+      var pod = new ChartwerkLineChart(
+        document.getElementById('chart'),
+        [
+          { target: 'test1', datapoints: data1, color: 'green' },
+          { target: 'test2', datapoints: data2, color: 'blue' },
+          { target: 'test3', datapoints: data3, color: 'orange' },
+        ],
+        options
+      );
+      pod.render();
+
+
+      function zoomIn(ranges) {
+        const range = ranges[1];
+        options.axis.y.range = range;
+        pod.updateData(undefined, options);
+      }
+
+      function zoomOut() {
+        options.axis.y.range = undefined;
+        pod.updateData(undefined, options)
+      }
+
+      function createDatapoints(arrayLength, startTime, randomValue, randomOffset = 0) {
+        return Array.from({ length: arrayLength }, (el, idx) => [
+          startTime + idx * 10000, // y axis
+          Math.floor(Math.random() * randomValue) + randomOffset // x axis
+        ]);
+      }
+
+      function timeValueFormatter(value) {
+        const date = new Date(value);
+        const hours = date.getHours();
+        const minutes = '0' + date.getMinutes();
+        const seconds = '0' + date.getSeconds();
+        return hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+      }
+    </script>
+  </body>
+</html>

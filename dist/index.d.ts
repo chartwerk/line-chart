@@ -20,13 +20,14 @@ export declare class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, Line
     appendCrosshairCircle(serieIdx: number): void;
     renderSharedCrosshair(timestamp: number): void;
     hideSharedCrosshair(): void;
-    moveCrosshairLine(xPosition: number): void;
+    moveCrosshairLine(xPosition: number, yPosition: number): void;
     moveCrosshairCircle(xPosition: number, yPosition: number, serieIdx: number): void;
     hideCrosshairCircle(serieIdx: number): void;
-    getClosestDatapoint(serie: LineTimeSerie, xValue: number): [number, number];
-    getClosestIndex(datapoints: [number, number][], xValue: number): number;
-    get xValueInterval(): number | undefined;
+    getClosestDatapoint(serie: LineTimeSerie, xValue: number, yValue: number): [number, number];
+    getClosestIndex(datapoints: [number, number][], xValue: number, yValue: number): number;
+    getValueInterval(columnIdx: number): number | undefined;
     onMouseMove(): void;
+    isOutOfRange(closestDatapoint: [number, number], xValue: number, yValue: number): boolean;
     onMouseOver(): void;
     onMouseOut(): void;
 }
