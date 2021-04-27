@@ -369,6 +369,8 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
 
     // TODO: not clear what points is, refactor mouse move callback
     let points = [];
+    const xValue = this.xScale.invert(eventX); // mouse x position in xScale
+    const yValue = this.yScale.invert(eventY);
     this.series.forEach((serie: LineTimeSerie, serieIdx: number) => {
       if(
         serie.visible === false ||
@@ -377,8 +379,6 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
         this.hideCrosshairCircle(serieIdx);
         return;
       }
-      const xValue = this.xScale.invert(eventX); // mouse x position in xScale
-      const yValue = this.yScale.invert(eventY);
       const closestDatapoint = this.getClosestDatapoint(serie, xValue, yValue);
       if(closestDatapoint === undefined || this.isOutOfRange(closestDatapoint, xValue, yValue)) {
         this.hideCrosshairCircle(serieIdx);
@@ -390,7 +390,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       this.moveCrosshairCircle(xPosition, yPosition, serieIdx);
 
       points.push({
-        value: closestDatapoint[0],
+        value: closestDatapoint,
         color: this.getSerieColor(serieIdx),
         label: serie.alias || serie.target
       });
@@ -405,7 +405,8 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
     this.options.eventsCallbacks.mouseMove({
       x: this.d3.event.pageX,
       y: this.d3.event.pageY,
-      time: this.xScale.invert(eventX),
+      xVal: xValue,
+      yVal: yValue,
       series: points,
       chartX: eventX,
       chartWidth: this.width
