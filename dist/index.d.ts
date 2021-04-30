@@ -18,15 +18,24 @@ export declare class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, Line
     updateCrosshair(): void;
     appendCrosshairCircles(): void;
     appendCrosshairCircle(serieIdx: number): void;
-    renderSharedCrosshair(timestamp: number): void;
+    renderSharedCrosshair(values: {
+        x?: number;
+        y?: number;
+    }): void;
     hideSharedCrosshair(): void;
-    moveCrosshairLine(xPosition: number): void;
+    moveCrosshairLine(xPosition: number, yPosition: number): void;
     moveCrosshairCircle(xPosition: number, yPosition: number, serieIdx: number): void;
     hideCrosshairCircle(serieIdx: number): void;
-    getClosestDatapoint(serie: LineTimeSerie, xValue: number): [number, number];
-    getClosestIndex(datapoints: [number, number][], xValue: number): number;
-    get xValueInterval(): number | undefined;
+    getClosestDatapoint(serie: LineTimeSerie, xValue: number, yValue: number): [number, number];
+    getClosestIndex(datapoints: [number, number][], xValue: number, yValue: number): number;
+    getValueInterval(columnIdx: number): number | undefined;
     onMouseMove(): void;
+    findAndHighlightDatapoints(xValue: number, yValue: number): {
+        value: [number, number];
+        color: string;
+        label: string;
+    }[];
+    isOutOfRange(closestDatapoint: [number, number], xValue: number, yValue: number): boolean;
     onMouseOver(): void;
     onMouseOut(): void;
 }
@@ -60,13 +69,14 @@ export declare const VueChartwerkLineChartObject: {
             renderChart(): void;
             appendEvents(): void;
             zoomIn(range: any): void;
-            zoomOut(center: any): void;
+            zoomOut(centers: any): void;
             mouseMove(evt: any): void;
             mouseOut(): void;
             onLegendClick(idx: any): void;
             panningEnd(range: any): void;
             panning(range: any): void;
             contextMenu(evt: any): void;
+            sharedCrosshairMove(event: any): void;
         };
     }[];
     methods: {
