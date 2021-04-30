@@ -18,7 +18,10 @@ export declare class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, Line
     updateCrosshair(): void;
     appendCrosshairCircles(): void;
     appendCrosshairCircle(serieIdx: number): void;
-    renderSharedCrosshair(timestamp: number): void;
+    renderSharedCrosshair(values: {
+        x?: number;
+        y?: number;
+    }): void;
     hideSharedCrosshair(): void;
     moveCrosshairLine(xPosition: number, yPosition: number): void;
     moveCrosshairCircle(xPosition: number, yPosition: number, serieIdx: number): void;
@@ -27,6 +30,11 @@ export declare class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, Line
     getClosestIndex(datapoints: [number, number][], xValue: number, yValue: number): number;
     getValueInterval(columnIdx: number): number | undefined;
     onMouseMove(): void;
+    findAndHighlightDatapoints(xValue: number, yValue: number): {
+        value: [number, number];
+        color: string;
+        label: string;
+    }[];
     isOutOfRange(closestDatapoint: [number, number], xValue: number, yValue: number): boolean;
     onMouseOver(): void;
     onMouseOut(): void;
@@ -68,6 +76,7 @@ export declare const VueChartwerkLineChartObject: {
             panningEnd(range: any): void;
             panning(range: any): void;
             contextMenu(evt: any): void;
+            sharedCrosshairMove(event: any): void;
         };
     }[];
     methods: {

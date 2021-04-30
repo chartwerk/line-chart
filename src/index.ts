@@ -145,7 +145,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
     this.chartContainer
       .append('path')
       .datum(datapoints)
-      .attr('class', `metric-path-${metricOptions.serieIdx}`)
+      .attr('class', `metric-path-${metricOptions.serieIdx} metric-el`)
       .attr('clip-path', `url(#${this.rectClipId})`)
       .attr('fill', 'none')
       .attr('stroke', metricOptions.color)
@@ -235,15 +235,23 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       .style('pointer-events', 'none');
   }
 
-  public renderSharedCrosshair(timestamp: number): void {
-    this.crosshair.style('display', null);
-    this.crosshair.selectAll('.crosshair-circle')
-      .style('display', 'none');
+  public renderSharedCrosshair(values: { x?: number, y?: number }): void {
+    this.onMouseOver(); // TODO: refactor to use it once
+    const eventX = this.xScale(values.x);
+    const eventY = this.yScale(values.y);
+    this.moveCrosshairLine(eventX, eventY);
+    const datapoints = this.findAndHighlightDatapoints(values.x, values.y);
 
-    const x = this.xScale(timestamp);
-    this.crosshair.select('#crosshair-line-x')
-      .attr('y1', 0).attr('x1', x)
-      .attr('y2', this.height).attr('x2', x);
+    if(this.options.eventsCallbacks === undefined || this.options.eventsCallbacks.sharedCrosshairMove === undefined) {
+      console.log('Mouse move, but there is no callback');
+      return;
+    }
+
+    // TODO: need to refactor this object
+    this.options.eventsCallbacks.sharedCrosshairMove({
+      datapoints: datapoints,
+      eventX, eventY
+    });
   }
 
   public hideSharedCrosshair(): void {
@@ -356,6 +364,8 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
   onMouseMove(): void {
     const eventX = this.d3.mouse(this.chartContainer.node())[0];
     const eventY = this.d3.mouse(this.chartContainer.node())[1];
+    const xValue = this.xScale.invert(eventX); // mouse x position in xScale
+    const yValue = this.yScale.invert(eventY);
     // TODO: isOutOfChart is a hack, use clip path correctly
     if(this.isOutOfChart() === true) {
       this.crosshair.style('display', 'none');
@@ -363,14 +373,30 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
     }
     this.moveCrosshairLine(eventX, eventY);
 
-    if(this.series === undefined || this.series.length === 0) {
+    const datapoints = this.findAndHighlightDatapoints(xValue, yValue);
+
+    if(this.options.eventsCallbacks === undefined || this.options.eventsCallbacks.mouseMove === undefined) {
+      console.log('Mouse move, but there is no callback');
       return;
     }
+    // TDOO: is shift key pressed
+    // TODO: need to refactor this object
+    this.options.eventsCallbacks.mouseMove({
+      x: this.d3.event.pageX,
+      y: this.d3.event.pageY,
+      xVal: xValue,
+      yVal: yValue,
+      series: datapoints,
+      chartX: eventX,
+      chartWidth: this.width
+    });
+  }
 
-    // TODO: not clear what points is, refactor mouse move callback
-    let points = [];
-    const xValue = this.xScale.invert(eventX); // mouse x position in xScale
-    const yValue = this.yScale.invert(eventY);
+  findAndHighlightDatapoints(xValue: number, yValue: number): { value: [number, number], color: string, label: string }[] {
+    if(this.series === undefined || this.series.length === 0) {
+      return [];
+    }
+    let points = []; // datapoints in each metric that is closest to xValue/yValue position
     this.series.forEach((serie: LineTimeSerie, serieIdx: number) => {
       if(
         serie.visible === false ||
@@ -395,26 +421,11 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
         label: serie.alias || serie.target
       });
     });
-
-    if(this.options.eventsCallbacks === undefined || this.options.eventsCallbacks.mouseMove === undefined) {
-      console.log('Mouse move, but there is no callback');
-      return;
-    }
-
-    // TODO: need to refactor this object
-    this.options.eventsCallbacks.mouseMove({
-      x: this.d3.event.pageX,
-      y: this.d3.event.pageY,
-      xVal: xValue,
-      yVal: yValue,
-      series: points,
-      chartX: eventX,
-      chartWidth: this.width
-    });
+    return points;
   }
 
   isOutOfRange(closestDatapoint: [number, number], xValue: number, yValue: number): boolean {
-    // find is mouse position more than xRange/yRange from closet point
+    // find is mouse position more than xRange/yRange from closest point
     let columnIdx; // 0 for y value, 1 for x value
     let value; // xValue ot y Value
     switch(this.options.crosshair.orientation) {

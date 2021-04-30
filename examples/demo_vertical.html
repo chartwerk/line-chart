@@ -23,8 +23,14 @@
           x: { format: 'numeric' }
         },
         zoomEvents: {
-          pan: { isActive: false },
-          brush: { isActive: true, orientation: 'vertical', keyEvent: 'main' }
+          mouse: {
+            pan: { isActive: true, orientation: 'vertical', keyEvent: 'shift' },
+            zoom: { isActive: true, orientation: 'vertical', keyEvent: 'main' }
+          },
+          scroll: {
+            pan: { isActive: true, orientation: 'vertical', keyEvent: 'main' },
+            zoom: { isActive: false, keyEvent: 'shift' }
+          }
         },
         eventsCallbacks: { zoomIn: zoomIn, zoomOut },
         crosshair: { orientation: 'horizontal' },
