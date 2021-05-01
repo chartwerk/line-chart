@@ -243,11 +243,10 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
     const datapoints = this.findAndHighlightDatapoints(values.x, values.y);
 
     if(this.options.eventsCallbacks === undefined || this.options.eventsCallbacks.sharedCrosshairMove === undefined) {
-      console.log('Mouse move, but there is no callback');
+      console.log('Shared crosshair move, but there is no callback');
       return;
     }
 
-    // TODO: need to refactor this object
     this.options.eventsCallbacks.sharedCrosshairMove({
       datapoints: datapoints,
       eventX, eventY
@@ -479,8 +478,14 @@ export const VueChartwerkLineChartObject = {
   mixins: [VueChartwerkPodMixin],
   methods: {
     render() {
-      const pod = new ChartwerkLineChart(document.getElementById(this.id), this.series, this.options);
-      pod.render();
+      this.pod = new ChartwerkLineChart(document.getElementById(this.id), this.series, this.options);
+      this.pod.render();
+    },
+    renderSharedCrosshair(values) {
+      this.pod.renderSharedCrosshair(values);
+    },
+    hideSharedCrosshair() {
+      this.pod.hideSharedCrosshair();
     }
   }
 };

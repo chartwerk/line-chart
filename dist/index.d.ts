@@ -66,11 +66,12 @@ export declare const VueChartwerkLineChartObject: {
         mounted(): void;
         methods: {
             render(): void;
-            renderChart(): void;
             renderSharedCrosshair(values: {
                 x?: number;
                 y?: number;
             }): void;
+            hideSharedCrosshair(): void;
+            renderChart(): void;
             appendEvents(): void;
             zoomIn(range: any): void;
             zoomOut(centers: any): void;
@@ -85,6 +86,8 @@ export declare const VueChartwerkLineChartObject: {
     }[];
     methods: {
         render(): void;
+        renderSharedCrosshair(values: any): void;
+        hideSharedCrosshair(): void;
     };
 };
 export { LineTimeSerie, LineOptions, Mode, TickOrientation, TimeFormat };
