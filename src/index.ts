@@ -14,6 +14,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
 
   constructor(_el: HTMLElement, _series: LineTimeSerie[] = [], _options: LineOptions = {}) {
     super(d3, _el, _series, _options);
+    console.log('test version');
   }
 
   renderMetrics(): void {
