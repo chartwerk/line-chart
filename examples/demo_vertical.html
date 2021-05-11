@@ -19,7 +19,7 @@
       let options = {
         renderLegend: false,
         axis: {
-          y: { invert: true, valueFormatter: timeValueFormatter, format: 'custom' },
+          y: { invert: true, valueFormatter: timeValueFormatter, format: 'custom', colorFormatter: colorFormatter },
           x: { format: 'numeric' }
         },
         zoomEvents: {
@@ -72,6 +72,13 @@
         const minutes = '0' + date.getMinutes();
         const seconds = '0' + date.getSeconds();
         return hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+      }
+
+      function colorFormatter(value, index) {
+        if(index % 2 === 0) {
+          return 'red';
+        }
+        return 'black';
       }
     </script>
   </body>
