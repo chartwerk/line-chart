@@ -32,7 +32,7 @@
             zoom: { isActive: false, keyEvent: 'shift' }
           }
         },
-        eventsCallbacks: { zoomIn: zoomIn, zoomOut },
+        eventsCallbacks: { zoomIn: zoomIn, zoomOut, panning: onPanning, },
         crosshair: { orientation: 'horizontal' },
         margin: { top: 30, right: 20, bottom: 20, left: 50 }
       }
@@ -56,7 +56,12 @@
 
       function zoomOut() {
         options.axis.y.range = undefined;
+        console.log('zoomOut', pod.updateData);
         pod.updateData(undefined, options)
+      }
+
+      function onPanning() {
+        console.log('panning', pod);
       }
 
       function createDatapoints(arrayLength, startTime, randomValue, randomOffset = 0) {

@@ -71,6 +71,7 @@ export declare const VueChartwerkLineChartObject: {
                 y?: number;
             }): void;
             hideSharedCrosshair(): void;
+            onPanningRescale(event: any): void;
             renderChart(): void;
             appendEvents(): void;
             zoomIn(range: any): void;
