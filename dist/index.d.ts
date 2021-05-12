@@ -2,6 +2,7 @@ import { ChartwerkPod, TickOrientation, TimeFormat } from '@chartwerk/core';
 import { LineTimeSerie, LineOptions, Mode } from './types';
 export declare class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions> {
     lineGenerator: any;
+    metricContainer: any;
     constructor(_el: HTMLElement, _series?: LineTimeSerie[], _options?: LineOptions);
     renderMetrics(): void;
     initLineGenerator(): void;
