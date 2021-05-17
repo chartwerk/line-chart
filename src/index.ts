@@ -482,8 +482,12 @@ export const VueChartwerkLineChartObject = {
   mixins: [VueChartwerkPodMixin],
   methods: {
     render() {
-      this.pod = new ChartwerkLineChart(document.getElementById(this.id), this.series, this.options);
-      this.pod.render();
+      if(this.pod === undefined) { 
+        this.pod = new ChartwerkLineChart(document.getElementById(this.id), this.series, this.options);
+        this.pod.render();
+      } else {
+        this.pod.updateData(this.series, this.options);
+      }
     },
     renderSharedCrosshair(values) {
       this.pod.renderSharedCrosshair(values);

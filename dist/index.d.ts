@@ -65,6 +65,7 @@ export declare const VueChartwerkLineChartObject: {
             options(): void;
         };
         mounted(): void;
+        destroyed(): void;
         methods: {
             render(): void;
             renderSharedCrosshair(values: {
