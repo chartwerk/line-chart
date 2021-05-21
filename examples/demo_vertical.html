@@ -7,7 +7,7 @@
     <script src="../dist/index.js" type="text/javascript"></script>
   </head>
   <body>
-    <div id="chart" style="width: 500px; height: 500px;"></div>
+    <div id="chart" style="width: 50%; height: 250px;"></div>
 
     <script type="text/javascript">
       const startTime = 1590590148;
@@ -19,7 +19,7 @@
       let options = {
         renderLegend: false,
         axis: {
-          y: { invert: true, valueFormatter: timeValueFormatter },
+          y: { invert: true, valueFormatter: timeValueFormatter, format: 'custom', colorFormatter: colorFormatter },
           x: { format: 'numeric' }
         },
         zoomEvents: {
@@ -32,7 +32,7 @@
             zoom: { isActive: false, keyEvent: 'shift' }
           }
         },
-        eventsCallbacks: { zoomIn: zoomIn, zoomOut },
+        eventsCallbacks: { zoomIn: zoomIn, zoomOut, panning: onPanning, },
         crosshair: { orientation: 'horizontal' },
         margin: { top: 30, right: 20, bottom: 20, left: 50 }
       }
@@ -56,7 +56,12 @@
 
       function zoomOut() {
         options.axis.y.range = undefined;
+        console.log('zoomOut', pod.updateData);
         pod.updateData(undefined, options)
+      }
+
+      function onPanning() {
+        console.log('panning', pod);
       }
 
       function createDatapoints(arrayLength, startTime, randomValue, randomOffset = 0) {
@@ -72,6 +77,13 @@
         const minutes = '0' + date.getMinutes();
         const seconds = '0' + date.getSeconds();
         return hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+      }
+
+      function colorFormatter(value, index) {
+        if(index % 2 === 0) {
+          return 'red';
+        }
+        return 'black';
       }
     </script>
   </body>

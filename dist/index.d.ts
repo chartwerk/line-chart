@@ -2,6 +2,7 @@ import { ChartwerkPod, TickOrientation, TimeFormat } from '@chartwerk/core';
 import { LineTimeSerie, LineOptions, Mode } from './types';
 export declare class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions> {
     lineGenerator: any;
+    metricContainer: any;
     constructor(_el: HTMLElement, _series?: LineTimeSerie[], _options?: LineOptions);
     renderMetrics(): void;
     initLineGenerator(): void;
@@ -64,8 +65,15 @@ export declare const VueChartwerkLineChartObject: {
             options(): void;
         };
         mounted(): void;
+        destroyed(): void;
         methods: {
             render(): void;
+            renderSharedCrosshair(values: {
+                x?: number;
+                y?: number;
+            }): void;
+            hideSharedCrosshair(): void;
+            onPanningRescale(event: any): void;
             renderChart(): void;
             appendEvents(): void;
             zoomIn(range: any): void;
@@ -81,6 +89,8 @@ export declare const VueChartwerkLineChartObject: {
     }[];
     methods: {
         render(): void;
+        renderSharedCrosshair(values: any): void;
+        hideSharedCrosshair(): void;
     };
 };
 export { LineTimeSerie, LineOptions, Mode, TickOrientation, TimeFormat };

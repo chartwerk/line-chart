@@ -11,6 +11,7 @@ const CROSSHAIR_BACKGROUND_OPACITY = 0.3;
 
 export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions> {
   lineGenerator = null;
+  metricContainer = null;
 
   constructor(_el: HTMLElement, _series: LineTimeSerie[] = [], _options: LineOptions = {}) {
     super(d3, _el, _series, _options);
@@ -25,6 +26,9 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       this.renderNoDataPointsMessage();
       return;
     }
+    this.metricContainer = this.chartContainer.append('g')
+      .attr('class', 'metrics-container')
+      .attr('clip-path', `url(#${this.rectClipId})`);
 
     for(let idx = 0; idx < this.series.length; ++idx) {
       if(this.series[idx].visible === false) {
@@ -70,12 +74,12 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
     }
 
     for(let idx = 0; idx < this.series.length; ++idx) {
-      this.chartContainer.select(`.metric-path-${idx}`)
+      this.metricContainer.select(`.metric-path-${idx}`)
         .datum(this.series[idx].datapoints)
         .attr('d', this.lineGenerator);
 
       if(this.series[idx].renderDots === true) {
-        this.chartContainer.selectAll(`.metric-circle-${idx}`)
+        this.metricContainer.selectAll(`.metric-circle-${idx}`)
           .data(this.series[idx].datapoints)
           .attr('cx', d => this.xScale(d[1]))
           .attr('cy', d => this.yScale(d[0]));
@@ -90,7 +94,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
   }
 
   _renderDots(datapoints: number[][], serieIdx: number): void {
-    this.chartContainer.selectAll(null)
+    this.metricContainer.selectAll(null)
       .data(datapoints)
       .enter()
       .append('circle')
@@ -120,7 +124,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
 
     if(metricOptions.mode === Mode.CHARGE) {
       const dataPairs = this.d3.pairs(datapoints);
-      this.chartContainer.selectAll(null)
+      this.metricContainer.selectAll(null)
         .data(dataPairs)
         .enter()
         .append('line')
@@ -142,7 +146,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       return;
     }
 
-    this.chartContainer
+    this.metricContainer
       .append('path')
       .datum(datapoints)
       .attr('class', `metric-path-${metricOptions.serieIdx} metric-el`)
@@ -179,7 +183,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       const zip = (arr1, arr2) => arr1.map((k, i) => [k[0],k[1], arr2[i][0]]);
       const data = zip(upperBoundDatapoints, lowerBoundDatapoints);
 
-      this.chartContainer.append('path')
+      this.metricContainer.append('path')
         .datum(data)
         .attr('fill', metricOptions.color)
         .attr('stroke', 'none')
@@ -192,7 +196,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
     }
 
     if(metricOptions.confidence > 0) {
-      this.chartContainer.append('path')
+      this.metricContainer.append('path')
         .datum(datapoints)
         .attr('fill', metricOptions.color)
         .attr('stroke', 'none')
@@ -243,11 +247,10 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
     const datapoints = this.findAndHighlightDatapoints(values.x, values.y);
 
     if(this.options.eventsCallbacks === undefined || this.options.eventsCallbacks.sharedCrosshairMove === undefined) {
-      console.log('Mouse move, but there is no callback');
+      console.log('Shared crosshair move, but there is no callback');
       return;
     }
 
-    // TODO: need to refactor this object
     this.options.eventsCallbacks.sharedCrosshairMove({
       datapoints: datapoints,
       eventX, eventY
@@ -479,8 +482,18 @@ export const VueChartwerkLineChartObject = {
   mixins: [VueChartwerkPodMixin],
   methods: {
     render() {
-      const pod = new ChartwerkLineChart(document.getElementById(this.id), this.series, this.options);
-      pod.render();
+      if(this.pod === undefined) { 
+        this.pod = new ChartwerkLineChart(document.getElementById(this.id), this.series, this.options);
+        this.pod.render();
+      } else {
+        this.pod.updateData(this.series, this.options);
+      }
+    },
+    renderSharedCrosshair(values) {
+      this.pod.renderSharedCrosshair(values);
+    },
+    hideSharedCrosshair() {
+      this.pod.hideSharedCrosshair();
     }
   }
 };
