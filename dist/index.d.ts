@@ -36,7 +36,7 @@ export declare class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, Line
         color: string;
         label: string;
     }[];
-    isOutOfRange(closestDatapoint: [number, number], xValue: number, yValue: number): boolean;
+    isOutOfRange(closestDatapoint: [number, number], xValue: number, yValue: number, useOutOfRange?: boolean): boolean;
     onMouseOver(): void;
     onMouseOut(): void;
 }

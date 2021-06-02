@@ -4,7 +4,8 @@ type LineTimeSerieParams = {
   confidence: number,
   mode: Mode,
   maxLength: number,
-  renderDots: boolean
+  renderDots: boolean,
+  useOutOfRange: boolean, // It's temporary hack. Need to refactor getValueInterval() method
 }
 export enum Mode {
   STANDARD = 'Standard',

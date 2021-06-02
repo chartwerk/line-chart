@@ -409,7 +409,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
         return;
       }
       const closestDatapoint = this.getClosestDatapoint(serie, xValue, yValue);
-      if(closestDatapoint === undefined || this.isOutOfRange(closestDatapoint, xValue, yValue)) {
+      if(closestDatapoint === undefined || this.isOutOfRange(closestDatapoint, xValue, yValue, serie.useOutOfRange)) {
         this.hideCrosshairCircle(serieIdx);
         return;
       }
@@ -427,8 +427,12 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
     return points;
   }
 
-  isOutOfRange(closestDatapoint: [number, number], xValue: number, yValue: number): boolean {
+  isOutOfRange(closestDatapoint: [number, number], xValue: number, yValue: number, useOutOfRange = true): boolean {
     // find is mouse position more than xRange/yRange from closest point
+    // TODO: refactor getValueInterval to remove this!
+    if(useOutOfRange === false) {
+      return false;
+    }
     let columnIdx; // 0 for y value, 1 for x value
     let value; // xValue ot y Value
     switch(this.options.crosshair.orientation) {
