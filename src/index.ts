@@ -38,6 +38,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       const mode = this.series[idx].mode || Mode.STANDARD;
       const target = this.series[idx].target;
       const renderDots = this.series[idx].renderDots !== undefined ? this.series[idx].renderDots : false;
+      const renderLines = this.series[idx].renderLines !== undefined ? this.series[idx].renderLines : false;
 
       this._renderMetric(
         this.series[idx].datapoints,
@@ -47,7 +48,8 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
           target,
           mode,
           serieIdx: idx,
-          renderDots
+          renderDots,
+          renderLines,
         }
       );
     }
@@ -107,6 +109,20 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       .attr('cy', d => this.yScale(d[0]));
   }
 
+  _renderLines(datapoints: number[][], serieIdx: number): void {
+    this.metricContainer
+      .append('path')
+      .datum(datapoints)
+      .attr('class', `metric-path-${serieIdx} metric-el`)
+      .attr('clip-path', `url(#${this.rectClipId})`)
+      .attr('fill', 'none')
+      .attr('stroke', this.getSerieColor(serieIdx))
+      .attr('stroke-width', 1)
+      .attr('stroke-opacity', 0.7)
+      .attr('pointer-events', 'none')
+      .attr('d', this.lineGenerator);
+  }
+
   _renderMetric(
     datapoints: number[][],
     metricOptions: {
@@ -115,7 +131,8 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       target: string,
       mode: Mode,
       serieIdx: number,
-      renderDots: boolean
+      renderDots: boolean,
+      renderLines: boolean,
     }
   ): void {
     if(_.includes(this.seriesTargetsWithBounds, metricOptions.target)) {
@@ -146,17 +163,9 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       return;
     }
 
-    this.metricContainer
-      .append('path')
-      .datum(datapoints)
-      .attr('class', `metric-path-${metricOptions.serieIdx} metric-el`)
-      .attr('clip-path', `url(#${this.rectClipId})`)
-      .attr('fill', 'none')
-      .attr('stroke', metricOptions.color)
-      .attr('stroke-width', 1)
-      .attr('stroke-opacity', 0.7)
-      .attr('pointer-events', 'none')
-      .attr('d', this.lineGenerator);
+    if(metricOptions.renderLines === true) {
+      this._renderLines(datapoints, metricOptions.serieIdx);
+    }
 
     if(metricOptions.renderDots === true) {
       this._renderDots(datapoints, metricOptions.serieIdx);

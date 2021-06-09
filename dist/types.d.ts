@@ -4,6 +4,7 @@ declare type LineTimeSerieParams = {
     mode: Mode;
     maxLength: number;
     renderDots: boolean;
+    renderLines: boolean;
     useOutOfRange: boolean;
 };
 export declare enum Mode {

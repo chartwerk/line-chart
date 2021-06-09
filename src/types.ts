@@ -5,6 +5,7 @@ type LineTimeSerieParams = {
   mode: Mode,
   maxLength: number,
   renderDots: boolean,
+  renderLines: boolean, // TODO: refactor same as scatter-pod
   useOutOfRange: boolean, // It's temporary hack. Need to refactor getValueInterval() method
 }
 export enum Mode {
