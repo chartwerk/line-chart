@@ -34,11 +34,12 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       if(this.series[idx].visible === false) {
         continue;
       }
+      // TODO: use _.defaults same as in core
       const confidence = this.series[idx].confidence || 0;
       const mode = this.series[idx].mode || Mode.STANDARD;
       const target = this.series[idx].target;
       const renderDots = this.series[idx].renderDots !== undefined ? this.series[idx].renderDots : false;
-      const renderLines = this.series[idx].renderLines !== undefined ? this.series[idx].renderLines : false;
+      const renderLines = this.series[idx].renderLines !== undefined ? this.series[idx].renderLines : true;
 
       this._renderMetric(
         this.series[idx].datapoints,
@@ -100,7 +101,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       .data(datapoints)
       .enter()
       .append('circle')
-      .attr('class', `metric-circle-${serieIdx}`)
+      .attr('class', `metric-circle-${serieIdx} metric-el`)
       .attr('clip-path', `url(#${this.rectClipId})`)
       .attr('fill', this.getSerieColor(serieIdx))
       .attr('r', METRIC_CIRCLE_RADIUS)
