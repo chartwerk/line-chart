@@ -12,7 +12,6 @@ const CROSSHAIR_BACKGROUND_OPACITY = 0.3;
 export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions> {
   lineGenerator = null;
   metricContainer = null;
-  circleHighlightThrottled = _.throttle((x, y) => this.findAndHighlightDatapoints(x, y), 50);
 
   constructor(_el: HTMLElement, _series: LineTimeSerie[] = [], _options: LineOptions = {}) {
     super(d3, _el, _series, _options);
@@ -27,9 +26,18 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       this.renderNoDataPointsMessage();
       return;
     }
-    this.metricContainer = this.chartContainer.append('g')
-      .attr('class', 'metrics-container')
-      .attr('clip-path', `url(#${this.rectClipId})`);
+
+    // TODO: move to core, and create only one container
+    // container for clip path
+    const clipContatiner = this.chartContainer
+      .append('g')
+      .attr('clip-path', `url(#${this.rectClipId})`)
+      .attr('class', 'metrics-container');
+
+    // container for panning
+    this.metricContainer = clipContatiner
+      .append('g')
+      .attr('class', ' metrics-rect')
 
     for(let idx = 0; idx < this.series.length; ++idx) {
       if(this.series[idx].visible === false) {
@@ -103,7 +111,6 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       .enter()
       .append('circle')
       .attr('class', `metric-circle-${serieIdx} metric-el`)
-      .attr('clip-path', `url(#${this.rectClipId})`)
       .attr('fill', this.getSerieColor(serieIdx))
       .attr('r', METRIC_CIRCLE_RADIUS)
       .style('pointer-events', 'none')
@@ -116,7 +123,6 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       .append('path')
       .datum(datapoints)
       .attr('class', `metric-path-${serieIdx} metric-el`)
-      .attr('clip-path', `url(#${this.rectClipId})`)
       .attr('fill', 'none')
       .attr('stroke', this.getSerieColor(serieIdx))
       .attr('stroke-width', 1)
@@ -255,7 +261,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
     const eventX = this.xScale(values.x);
     const eventY = this.yScale(values.y);
     this.moveCrosshairLine(eventX, eventY);
-    const datapoints = this.circleHighlightThrottled(values.x, values.y);
+    const datapoints = this.findAndHighlightDatapoints(values.x, values.y);
 
     if(this.options.eventsCallbacks === undefined || this.options.eventsCallbacks.sharedCrosshairMove === undefined) {
       console.log('Shared crosshair move, but there is no callback');
@@ -387,7 +393,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
     }
     this.moveCrosshairLine(eventX, eventY);
 
-    const datapoints = this.circleHighlightThrottled(xValue, yValue);
+    const datapoints = this.findAndHighlightDatapoints(xValue, yValue);
 
     if(this.options.eventsCallbacks === undefined || this.options.eventsCallbacks.mouseMove === undefined) {
       console.log('Mouse move, but there is no callback');

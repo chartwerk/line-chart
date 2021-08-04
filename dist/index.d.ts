@@ -1,14 +1,8 @@
 import { ChartwerkPod, TickOrientation, TimeFormat } from '@chartwerk/core';
 import { LineTimeSerie, LineOptions, Mode } from './types';
-import * as _ from 'lodash';
 export declare class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions> {
     lineGenerator: any;
     metricContainer: any;
-    circleHighlightThrottled: _.DebouncedFunc<(x: any, y: any) => {
-        value: [number, number];
-        color: string;
-        label: string;
-    }[]>;
     constructor(_el: HTMLElement, _series?: LineTimeSerie[], _options?: LineOptions);
     renderMetrics(): void;
     initLineGenerator(): void;
