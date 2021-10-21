@@ -26,18 +26,29 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       this.renderNoDataPointsMessage();
       return;
     }
-    this.metricContainer = this.chartContainer.append('g')
-      .attr('class', 'metrics-container')
-      .attr('clip-path', `url(#${this.rectClipId})`);
+
+    // TODO: move to core, and create only one container
+    // container for clip path
+    const clipContatiner = this.chartContainer
+      .append('g')
+      .attr('clip-path', `url(#${this.rectClipId})`)
+      .attr('class', 'metrics-container');
+
+    // container for panning
+    this.metricContainer = clipContatiner
+      .append('g')
+      .attr('class', ' metrics-rect')
 
     for(let idx = 0; idx < this.series.length; ++idx) {
       if(this.series[idx].visible === false) {
         continue;
       }
+      // TODO: use _.defaults same as in core
       const confidence = this.series[idx].confidence || 0;
       const mode = this.series[idx].mode || Mode.STANDARD;
       const target = this.series[idx].target;
       const renderDots = this.series[idx].renderDots !== undefined ? this.series[idx].renderDots : false;
+      const renderLines = this.series[idx].renderLines !== undefined ? this.series[idx].renderLines : true;
 
       this._renderMetric(
         this.series[idx].datapoints,
@@ -47,7 +58,8 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
           target,
           mode,
           serieIdx: idx,
-          renderDots
+          renderDots,
+          renderLines,
         }
       );
     }
@@ -98,13 +110,25 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       .data(datapoints)
       .enter()
       .append('circle')
-      .attr('class', `metric-circle-${serieIdx}`)
-      .attr('clip-path', `url(#${this.rectClipId})`)
+      .attr('class', `metric-circle-${serieIdx} metric-el`)
       .attr('fill', this.getSerieColor(serieIdx))
       .attr('r', METRIC_CIRCLE_RADIUS)
       .style('pointer-events', 'none')
       .attr('cx', d => this.xScale(d[1]))
       .attr('cy', d => this.yScale(d[0]));
+  }
+
+  _renderLines(datapoints: number[][], serieIdx: number): void {
+    this.metricContainer
+      .append('path')
+      .datum(datapoints)
+      .attr('class', `metric-path-${serieIdx} metric-el`)
+      .attr('fill', 'none')
+      .attr('stroke', this.getSerieColor(serieIdx))
+      .attr('stroke-width', 1)
+      .attr('stroke-opacity', 0.7)
+      .attr('pointer-events', 'none')
+      .attr('d', this.lineGenerator);
   }
 
   _renderMetric(
@@ -115,7 +139,8 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       target: string,
       mode: Mode,
       serieIdx: number,
-      renderDots: boolean
+      renderDots: boolean,
+      renderLines: boolean,
     }
   ): void {
     if(_.includes(this.seriesTargetsWithBounds, metricOptions.target)) {
@@ -146,17 +171,9 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
       return;
     }
 
-    this.metricContainer
-      .append('path')
-      .datum(datapoints)
-      .attr('class', `metric-path-${metricOptions.serieIdx} metric-el`)
-      .attr('clip-path', `url(#${this.rectClipId})`)
-      .attr('fill', 'none')
-      .attr('stroke', metricOptions.color)
-      .attr('stroke-width', 1)
-      .attr('stroke-opacity', 0.7)
-      .attr('pointer-events', 'none')
-      .attr('d', this.lineGenerator);
+    if(metricOptions.renderLines === true) {
+      this._renderLines(datapoints, metricOptions.serieIdx);
+    }
 
     if(metricOptions.renderDots === true) {
       this._renderDots(datapoints, metricOptions.serieIdx);
@@ -409,7 +426,7 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
         return;
       }
       const closestDatapoint = this.getClosestDatapoint(serie, xValue, yValue);
-      if(closestDatapoint === undefined || this.isOutOfRange(closestDatapoint, xValue, yValue)) {
+      if(closestDatapoint === undefined || this.isOutOfRange(closestDatapoint, xValue, yValue, serie.useOutOfRange)) {
         this.hideCrosshairCircle(serieIdx);
         return;
       }
@@ -427,8 +444,12 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
     return points;
   }
 
-  isOutOfRange(closestDatapoint: [number, number], xValue: number, yValue: number): boolean {
+  isOutOfRange(closestDatapoint: [number, number], xValue: number, yValue: number, useOutOfRange = true): boolean {
     // find is mouse position more than xRange/yRange from closest point
+    // TODO: refactor getValueInterval to remove this!
+    if(useOutOfRange === false) {
+      return false;
+    }
     let columnIdx; // 0 for y value, 1 for x value
     let value; // xValue ot y Value
     switch(this.options.crosshair.orientation) {
