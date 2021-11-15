@@ -106,11 +106,13 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
   }
 
   _renderDots(datapoints: number[][], serieIdx: number): void {
+    const customClass = this.series[serieIdx].class || '';
+
     this.metricContainer.selectAll(null)
       .data(datapoints)
       .enter()
       .append('circle')
-      .attr('class', `metric-circle-${serieIdx} metric-el`)
+      .attr('class', `metric-circle-${serieIdx} metric-el ${customClass}`)
       .attr('fill', this.getSerieColor(serieIdx))
       .attr('r', METRIC_CIRCLE_RADIUS)
       .style('pointer-events', 'none')
