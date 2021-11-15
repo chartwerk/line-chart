@@ -6,7 +6,9 @@ type LineTimeSerieParams = {
   maxLength: number,
   renderDots: boolean,
   renderLines: boolean, // TODO: refactor same as scatter-pod
-  useOutOfRange: boolean, // It's temporary hack. Need to refactor getValueInterval() method
+  dashArray: string, // TODO: just for testing. Use enum
+  useOutOfRange: boolean, // It's temporary hack. Need to refactor getValueInterval() method,
+  class: string, // option to add custom class to each serie element
 }
 export enum Mode {
   STANDARD = 'Standard',

@@ -119,15 +119,19 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
   }
 
   _renderLines(datapoints: number[][], serieIdx: number): void {
+    const dashArray = this.series[serieIdx].dashArray !== undefined ? this.series[serieIdx].dashArray : '0';
+    const customClass = this.series[serieIdx].class || '';
+
     this.metricContainer
       .append('path')
       .datum(datapoints)
-      .attr('class', `metric-path-${serieIdx} metric-el`)
+      .attr('class', `metric-path-${serieIdx} metric-el ${customClass}`)
       .attr('fill', 'none')
       .attr('stroke', this.getSerieColor(serieIdx))
       .attr('stroke-width', 1)
       .attr('stroke-opacity', 0.7)
       .attr('pointer-events', 'none')
+      .style('stroke-dasharray', dashArray)
       .attr('d', this.lineGenerator);
   }
 
