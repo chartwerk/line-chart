@@ -19,7 +19,8 @@
       const zoomOut = (ranges) => { console.log('zoomout'); options.axis.x.range = undefined; pod.updateData(undefined, options) }
       let options = {
         renderLegend: false, usePanning: false, axis: { y: { invert: false, range: [0, 350] }, x: { format: 'time' } },
-        eventsCallbacks: { zoomIn: zoomIn, zoomOut }
+        eventsCallbacks: { zoomIn: zoomIn, zoomOut },
+        renderClipPath: true,
       }
       var pod = new ChartwerkLineChart(
         document.getElementById('chart'),

@@ -29,10 +29,17 @@ export class ChartwerkLineChart extends ChartwerkPod<LineTimeSerie, LineOptions>
 
     // TODO: move to core, and create only one container
     // container for clip path
-    const clipContatiner = this.chartContainer
-      .append('g')
-      .attr('clip-path', `url(#${this.rectClipId})`)
-      .attr('class', 'metrics-container');
+    let clipContatiner;
+    if(this.options.renderClipPath) {
+      clipContatiner = this.chartContainer
+        .append('g')
+        .attr('class', 'metrics-container')
+        .attr('clip-path', `url(#${this.rectClipId})`);
+    } else {
+      clipContatiner = this.chartContainer
+        .append('g')
+        .attr('class', 'metrics-container');
+    }
 
     // container for panning
     this.metricContainer = clipContatiner
